@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/services.xsd">
+    <description>Relationshipmgr Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <!-- Standard entity-auto services -->
+    <service name="createRmgrParty" default-entity-name="RmgrParty" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="createRmgrPerson" default-entity-name="RmgrPerson" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="birthDate" optional="true"/>
+    </service>
+    <service name="createRmgrOrganization" default-entity-name="RmgrOrganization" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="createRmgrPartyRole" default-entity-name="RmgrPartyRole" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createRmgrContactMech" default-entity-name="RmgrContactMech" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="infoString" optional="true"/>
+    </service>
+    <service name="createRmgrTelecomNumber" default-entity-name="RmgrTelecomNumber" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="countryCode" optional="true"/>
+        <override name="areaCode" optional="true"/>
+    </service>
+    <service name="createRmgrPostalAddress" default-entity-name="RmgrPostalAddress" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="attnName" optional="true"/>
+        <override name="address2" optional="true"/>
+    </service>
+    <service name="createRmgrPartyContactMech" default-entity-name="RmgrPartyContactMech" engine="entity-auto" invoke="create" auth="true">
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+
+    <!-- Custom composite services using Groovy -->
+    <service name="createPersonWithParty" engine="groovy" location="component://relationshipmgr/groovyScripts/RelationshipServices.groovy" invoke="createPersonWithParty" auth="true">
+        <description>Create RmgrParty, RmgrPerson, and associate RmgrPartyRole</description>
+        <attribute name="partyId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="firstName" type="String" mode="IN" optional="false"/>
+        <attribute name="lastName" type="String" mode="IN" optional="false"/>
+        <attribute name="birthDate" type="java.sql.Date" mode="IN" optional="true"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createOrganizationWithParty" engine="groovy" location="component://relationshipmgr/groovyScripts/RelationshipServices.groovy" invoke="createOrganizationWithParty" auth="true">
+        <description>Create RmgrParty, RmgrOrganization, and associate RmgrPartyRole</description>
+        <attribute name="partyId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="organizationName" type="String" mode="IN" optional="false"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createTelecomNumberWithContact" engine="groovy" location="component://relationshipmgr/groovyScripts/RelationshipServices.groovy" invoke="createTelecomNumberWithContact" auth="true">
+        <description>Create telecom contact mech and associate it to a party</description>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeId" type="String" mode="IN" optional="false"/>
+        <attribute name="countryCode" type="String" mode="IN" optional="true"/>
+        <attribute name="areaCode" type="String" mode="IN" optional="true"/>
+        <attribute name="contactNumber" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createPostalAddressWithContact" engine="groovy" location="component://relationshipmgr/groovyScripts/RelationshipServices.groovy" invoke="createPostalAddressWithContact" auth="true">
+        <description>Create postal address contact mech and associate it to a party</description>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeId" type="String" mode="IN" optional="false"/>
+        <attribute name="toName" type="String" mode="IN" optional="false"/>
+        <attribute name="attnName" type="String" mode="IN" optional="true"/>
+        <attribute name="address1" type="String" mode="IN" optional="false"/>
+        <attribute name="address2" type="String" mode="IN" optional="true"/>
+        <attribute name="city" type="String" mode="IN" optional="false"/>
+        <attribute name="postalCode" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createEmailWithContact" engine="groovy" location="component://relationshipmgr/groovyScripts/RelationshipServices.groovy" invoke="createEmailWithContact" auth="true">
+        <description>Create email address contact mech and associate it to a party</description>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeId" type="String" mode="IN" optional="false"/>
+        <attribute name="infoString" type="String" mode="IN" optional="false"/>
+    </service>
+
+</services>

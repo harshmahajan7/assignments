@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <!-- Role Types -->
+    <RmgrRoleType roleTypeId="CUSTOMER" description="Customer"/>
+    <RmgrRoleType roleTypeId="SUPPLIER" description="Supplier"/>
+    <RmgrRoleType roleTypeId="EMPLOYEE" description="Employee"/>
+    <RmgrRoleType roleTypeId="EMPLOYER" description="Employer"/>
+    <RmgrRoleType roleTypeId="COLLEGE" description="College/University"/>
+    <RmgrRoleType roleTypeId="DEPARTMENT" description="Department"/>
+    <RmgrRoleType roleTypeId="STUDENT" description="Student"/>
+    <RmgrRoleType roleTypeId="TEACHER" description="Teaching Staff"/>
+
+    <!-- Contact Mechanism Purposes -->
+    <RmgrContactMechPurpose contactMechPurposeId="HOME" description="Home"/>
+    <RmgrContactMechPurpose contactMechPurposeId="WORK" description="Work"/>
+    <RmgrContactMechPurpose contactMechPurposeId="OFFICE" description="Office"/>
+    <RmgrContactMechPurpose contactMechPurposeId="BILLING_LOCATION" description="Billing Location"/>
+    <RmgrContactMechPurpose contactMechPurposeId="SHIPPING_LOCATION" description="Shipping Location"/>
+</entity-engine-xml>

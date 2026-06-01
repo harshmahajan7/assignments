@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <title>Entity Model for Relationship Manager Plugin</title>
+    <description>Custom relationship entities implementing Party, Person, Organization, Roles, and Contact Mechanisms</description>
+
+    <!-- Supertype: Party -->
+    <entity entity-name="RmgrParty" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Party Supertype">
+        <field name="partyId" type="id"><description>Primary identifier for a party</description></field>
+        <field name="partyTypeId" type="id"><description>PERSON or ORGANIZATION</description></field>
+        <prim-key field="partyId"/>
+    </entity>
+
+    <!-- Subtype: Person -->
+    <entity entity-name="RmgrPerson" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Person Subtype">
+        <field name="partyId" type="id"></field>
+        <field name="firstName" type="name"></field>
+        <field name="lastName" type="name"></field>
+        <field name="birthDate" type="date"></field>
+        <prim-key field="partyId"/>
+        <relation type="one" fk-name="RMGR_PRSN_PRTY" rel-entity-name="RmgrParty">
+            <key-map field-name="partyId"/>
+        </relation>
+    </entity>
+
+    <!-- Subtype: Organization -->
+    <entity entity-name="RmgrOrganization" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Organization Subtype">
+        <field name="partyId" type="id"></field>
+        <field name="organizationName" type="name"></field>
+        <prim-key field="partyId"/>
+        <relation type="one" fk-name="RMGR_ORG_PRTY" rel-entity-name="RmgrParty">
+            <key-map field-name="partyId"/>
+        </relation>
+    </entity>
+
+    <!-- RoleType Entity -->
+    <entity entity-name="RmgrRoleType" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Role Type">
+        <field name="roleTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="roleTypeId"/>
+    </entity>
+
+    <!-- Intersection/Association Entity: PartyRole -->
+    <entity entity-name="RmgrPartyRole" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Party Role Association">
+        <field name="partyId" type="id"></field>
+        <field name="roleTypeId" type="id"></field>
+        <prim-key field="partyId"/>
+        <prim-key field="roleTypeId"/>
+        <relation type="one" fk-name="RMGR_PR_PRTY" rel-entity-name="RmgrParty">
+            <key-map field-name="partyId"/>
+        </relation>
+        <relation type="one" fk-name="RMGR_PR_RLE" rel-entity-name="RmgrRoleType">
+            <key-map field-name="roleTypeId"/>
+        </relation>
+    </entity>
+
+    <!-- Supertype: Contact Mechanism -->
+    <entity entity-name="RmgrContactMech" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Contact Mechanism Supertype">
+        <field name="contactMechId" type="id"></field>
+        <field name="contactMechTypeEnumId" type="id"><description>TELECOM_NUMBER, EMAIL_ADDRESS, POSTAL_ADDRESS</description></field>
+        <field name="infoString" type="value"></field>
+        <prim-key field="contactMechId"/>
+    </entity>
+
+    <!-- Subtype: TelecomNumber -->
+    <entity entity-name="RmgrTelecomNumber" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Telecom Number Subtype">
+        <field name="contactMechId" type="id"></field>
+        <field name="countryCode" type="name"></field>
+        <field name="areaCode" type="name"></field>
+        <field name="contactNumber" type="name"></field>
+        <prim-key field="contactMechId"/>
+        <relation type="one" fk-name="RMGR_TEL_CM" rel-entity-name="RmgrContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+    </entity>
+
+    <!-- Subtype: PostalAddress -->
+    <entity entity-name="RmgrPostalAddress" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Postal Address Subtype">
+        <field name="contactMechId" type="id"></field>
+        <field name="toName" type="name"></field>
+        <field name="attnName" type="name"></field>
+        <field name="address1" type="name"></field>
+        <field name="address2" type="name"></field>
+        <field name="city" type="name"></field>
+        <field name="postalCode" type="name"></field>
+        <prim-key field="contactMechId"/>
+        <relation type="one" fk-name="RMGR_PST_CM" rel-entity-name="RmgrContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+    </entity>
+
+    <!-- ContactMechPurpose Entity -->
+    <entity entity-name="RmgrContactMechPurpose" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Contact Mechanism Purpose">
+        <field name="contactMechPurposeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="contactMechPurposeId"/>
+    </entity>
+
+    <!-- Intersection/Association Entity: PartyContactMech -->
+    <entity entity-name="RmgrPartyContactMech" package-name="org.apache.ofbiz.relationshipmgr" title="Relationship Manager Party Contact Mechanism Association">
+        <field name="partyId" type="id"></field>
+        <field name="contactMechId" type="id"></field>
+        <field name="contactMechPurposeId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="partyId"/>
+        <prim-key field="contactMechId"/>
+        <prim-key field="contactMechPurposeId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="RMGR_PCM_PRTY" rel-entity-name="RmgrParty">
+            <key-map field-name="partyId"/>
+        </relation>
+        <relation type="one" fk-name="RMGR_PCM_CM" rel-entity-name="RmgrContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+        <relation type="one" fk-name="RMGR_PCM_PRP" rel-entity-name="RmgrContactMechPurpose">
+            <key-map field-name="contactMechPurposeId"/>
+        </relation>
+    </entity>
+
+</entitymodel>

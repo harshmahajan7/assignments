@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <!-- Parties -->
+    <RmgrParty partyId="COLL01" partyTypeId="ORGANIZATION"/>
+    <RmgrParty partyId="DEPT01" partyTypeId="ORGANIZATION"/>
+    <RmgrParty partyId="STUD01" partyTypeId="PERSON"/>
+    <RmgrParty partyId="STUD02" partyTypeId="PERSON"/>
+    <RmgrParty partyId="TEACH01" partyTypeId="PERSON"/>
+
+    <!-- Organizations -->
+    <RmgrOrganization partyId="COLL01" organizationName="St. Stephens College"/>
+    <RmgrOrganization partyId="DEPT01" organizationName="Computer Science Department"/>
+
+    <!-- Persons -->
+    <RmgrPerson partyId="STUD01" firstName="Alice" lastName="Johnson" birthDate="2002-05-15"/>
+    <RmgrPerson partyId="STUD02" firstName="Bob" lastName="Smith" birthDate="2001-11-20"/>
+    <RmgrPerson partyId="TEACH01" firstName="Charles" lastName="Xavier" birthDate="1975-08-30"/>
+
+    <!-- Party Roles -->
+    <RmgrPartyRole partyId="COLL01" roleTypeId="COLLEGE"/>
+    <RmgrPartyRole partyId="DEPT01" roleTypeId="DEPARTMENT"/>
+    <RmgrPartyRole partyId="STUD01" roleTypeId="STUDENT"/>
+    <RmgrPartyRole partyId="STUD02" roleTypeId="STUDENT"/>
+    <RmgrPartyRole partyId="TEACH01" roleTypeId="TEACHER"/>
+
+    <!-- Contact Mechanisms -->
+    <!-- College Address -->
+    <RmgrContactMech contactMechId="CM_COLL_ADDR" contactMechTypeEnumId="POSTAL_ADDRESS"/>
+    <RmgrPostalAddress contactMechId="CM_COLL_ADDR" toName="St. Stephens College" attnName="Administration" address1="Sudhir Bose Marg" city="Delhi" postalCode="110007"/>
+
+    <!-- College Phone -->
+    <RmgrContactMech contactMechId="CM_COLL_TEL" contactMechTypeEnumId="TELECOM_NUMBER"/>
+    <RmgrTelecomNumber contactMechId="CM_COLL_TEL" countryCode="91" areaCode="11" contactNumber="27667200"/>
+
+    <!-- Department Email -->
+    <RmgrContactMech contactMechId="CM_DEPT_EMAIL" contactMechTypeEnumId="EMAIL_ADDRESS" infoString="cs.dept@ststephens.edu"/>
+
+    <!-- Student Email -->
+    <RmgrContactMech contactMechId="CM_STUD1_EMAIL" contactMechTypeEnumId="EMAIL_ADDRESS" infoString="alice.j@example.com"/>
+
+    <!-- Teacher Phone -->
+    <RmgrContactMech contactMechId="CM_TEACH1_TEL" contactMechTypeEnumId="TELECOM_NUMBER"/>
+    <RmgrTelecomNumber contactMechId="CM_TEACH1_TEL" countryCode="91" areaCode="98" contactNumber="99999999"/>
+
+    <!-- Associations: PartyContactMech -->
+    <RmgrPartyContactMech partyId="COLL01" contactMechId="CM_COLL_ADDR" contactMechPurposeId="OFFICE" fromDate="2020-01-01 00:00:00.0"/>
+    <RmgrPartyContactMech partyId="COLL01" contactMechId="CM_COLL_TEL" contactMechPurposeId="WORK" fromDate="2020-01-01 00:00:00.0"/>
+    <RmgrPartyContactMech partyId="DEPT01" contactMechId="CM_DEPT_EMAIL" contactMechPurposeId="WORK" fromDate="2020-01-01 00:00:00.0"/>
+    <RmgrPartyContactMech partyId="STUD01" contactMechId="CM_STUD1_EMAIL" contactMechPurposeId="HOME" fromDate="2022-07-01 00:00:00.0"/>
+    <RmgrPartyContactMech partyId="TEACH01" contactMechId="CM_TEACH1_TEL" contactMechPurposeId="WORK" fromDate="2015-06-01 00:00:00.0"/>
+
+</entity-engine-xml>

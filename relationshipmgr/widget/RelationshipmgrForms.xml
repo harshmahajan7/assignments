@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- Find Parties Form -->
+    <form name="FindParties" type="single" target="main" title="Find Parties Form">
+        <field name="partyId" title="Party ID"><text-find/></field>
+        <field name="partyTypeId" title="Party Type">
+            <drop-down allow-empty="true">
+                <option key="PERSON" description="Person"/>
+                <option key="ORGANIZATION" description="Organization"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Search"><submit button-type="button"/></field>
+    </form>
+
+    <!-- List Parties Form -->
+    <form name="ListParties" type="list" list-name="listIt" paginate-target="main"
+          odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result">
+                <field-map field-name="entityName" value="RmgrParty"/>
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="partyId" title="Party ID"><hyperlink description="${partyId}" target="viewPartyDetails?partyId=${partyId}"/></field>
+        <field name="partyTypeId" title="Party Type"><display/></field>
+        <!-- Custom field mapping for name or organizationName can be done inside screen actions -->
+        <field name="details" title="Name / Organization Name">
+            <hyperlink description="View Details" target="viewPartyDetails?partyId=${partyId}"/>
+        </field>
+    </form>
+
+    <!-- Add Person Form -->
+    <form name="AddPerson" type="single" target="createPerson" title="Add Person Form">
+        <field name="partyId" title="Party ID (Optional)"><text size="20" maxlength="20"/></field>
+        <field name="firstName" title="First Name" required-field="true"><text/></field>
+        <field name="lastName" title="Last Name" required-field="true"><text/></field>
+        <field name="birthDate" title="Birth Date"><date-time type="date"/></field>
+        <field name="roleTypeId" title="Role Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RmgrRoleType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Create Person"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Add Organization Form -->
+    <form name="AddOrganization" type="single" target="createOrganization" title="Add Organization Form">
+        <field name="partyId" title="Party ID (Optional)"><text size="20" maxlength="20"/></field>
+        <field name="organizationName" title="Organization Name" required-field="true"><text/></field>
+        <field name="roleTypeId" title="Role Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RmgrRoleType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Create Organization"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Add Telecom Number Form -->
+    <form name="AddTelecom" type="single" target="createTelecom" title="Add Telecom Number">
+        <field name="partyId"><hidden/></field>
+        <field name="contactMechPurposeId" title="Purpose">
+            <drop-down>
+                <entity-options entity-name="RmgrContactMechPurpose" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="countryCode" title="Country Code"><text size="5"/></field>
+        <field name="areaCode" title="Area Code"><text size="5"/></field>
+        <field name="contactNumber" title="Contact Number" required-field="true"><text/></field>
+        <field name="submitButton" title="Add Phone"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Add Postal Address Form -->
+    <form name="AddPostalAddress" type="single" target="createPostal" title="Add Postal Address">
+        <field name="partyId"><hidden/></field>
+        <field name="contactMechPurposeId" title="Purpose">
+            <drop-down>
+                <entity-options entity-name="RmgrContactMechPurpose" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="toName" title="To Name" required-field="true"><text/></field>
+        <field name="attnName" title="Attn Name"><text/></field>
+        <field name="address1" title="Address Line 1" required-field="true"><text/></field>
+        <field name="address2" title="Address Line 2"><text/></field>
+        <field name="city" title="City" required-field="true"><text/></field>
+        <field name="postalCode" title="Postal Code" required-field="true"><text/></field>
+        <field name="submitButton" title="Add Address"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Add Email Form -->
+    <form name="AddEmail" type="single" target="createEmail" title="Add Email Address">
+        <field name="partyId"><hidden/></field>
+        <field name="contactMechPurposeId" title="Purpose">
+            <drop-down>
+                <entity-options entity-name="RmgrContactMechPurpose" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="infoString" title="Email Address" required-field="true"><text/></field>
+        <field name="submitButton" title="Add Email"><submit button-type="button"/></field>
+    </form>
+
+</forms>

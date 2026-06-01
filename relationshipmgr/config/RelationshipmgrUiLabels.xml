@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
+    <property key="RelationshipmgrApplication">
+        <value xml:lang="en">Relationship Manager</value>
+    </property>
+    <property key="RelationshipmgrCompanyName">
+        <value xml:lang="en">OFBiz: Relationshipmgr</value>
+    </property>
+    <property key="RelationshipmgrCompanySubtitle">
+        <value xml:lang="en">Part of the Apache OFBiz Family of Open Source Software</value>
+    </property>
+    <property key="RelationshipmgrViewPermissionError">
+        <value xml:lang="en">You are not allowed to view this page.</value>
+    </property>
+    <property key="RelationshipmgrAddPerson">
+        <value xml:lang="en">Add Person</value>
+    </property>
+    <property key="RelationshipmgrAddOrganization">
+        <value xml:lang="en">Add Organization</value>
+    </property>
+    <property key="RelationshipmgrPartyDetails">
+        <value xml:lang="en">Party Contact Details</value>
+    </property>
+</resource>
