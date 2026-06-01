@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+
+    <!-- ============================================================ -->
+    <!-- TYPE / REFERENCE DATA                                        -->
+    <!-- ============================================================ -->
+
+    <!-- Order Types -->
+    <OmsOrderType orderTypeId="SALES_ORDER"    description="Sales Order"/>
+    <OmsOrderType orderTypeId="PURCHASE_ORDER" description="Purchase Order"/>
+
+    <!-- Order Status Types -->
+    <OmsOrderStatusType statusId="CREATED"              description="Created"/>
+    <OmsOrderStatusType statusId="APPROVED"             description="Approved"/>
+    <OmsOrderStatusType statusId="PART_PLACED"          description="Part Placed"/>
+    <OmsOrderStatusType statusId="PARTIALLY_FULFILLED"  description="Partially Fulfilled"/>
+    <OmsOrderStatusType statusId="COMPLETED"            description="Completed"/>
+    <OmsOrderStatusType statusId="CANCELLED"            description="Cancelled"/>
+
+    <!-- Order Adjustment Types -->
+    <OmsOrderAdjustmentType orderAdjustmentTypeId="SALES_TAX"       description="Sales Tax"/>
+    <OmsOrderAdjustmentType orderAdjustmentTypeId="SHIPPING_CHARGE" description="Shipping Charge"/>
+    <OmsOrderAdjustmentType orderAdjustmentTypeId="DISCOUNT"        description="Discount"/>
+    <OmsOrderAdjustmentType orderAdjustmentTypeId="COUPON"          description="Coupon"/>
+
+    <!-- Order Term Types -->
+    <OmsOrderTermType orderTermTypeId="NET_DAYS"         description="Net Days"/>
+    <OmsOrderTermType orderTermTypeId="PAYMENT_ON_DLVR"  description="Payment on Delivery"/>
+    <OmsOrderTermType orderTermTypeId="PREPAID"          description="Prepaid"/>
+    <OmsOrderTermType orderTermTypeId="DELIVERY_BY"      description="Delivery By Date"/>
+
+    <!-- Order Item Types -->
+    <OmsOrderItemType orderItemTypeId="PRODUCT_ORDER_ITEM" description="Product Order Item"/>
+    <OmsOrderItemType orderItemTypeId="ADJUSTMENT_ITEM"    description="Adjustment Item (Tax/Fee)"/>
+
+    <!-- Order Item Assoc Types -->
+    <OmsOrderItemAssocType orderItemAssocTypeId="SPLIT_FROM"    description="Split From"/>
+    <OmsOrderItemAssocType orderItemAssocTypeId="BACK_ORDER"    description="Back Order"/>
+    <OmsOrderItemAssocType orderItemAssocTypeId="REPLACEMENT"   description="Replacement"/>
+
+    <!-- Party Types -->
+    <OmsPartyType partyTypeId="PERSON"       description="Person"/>
+    <OmsPartyType partyTypeId="ORGANIZATION" description="Organization"/>
+
+    <!-- Party Role Types -->
+    <OmsPartyRoleType partyRoleTypeId="CUSTOMER"           description="Customer"/>
+    <OmsPartyRoleType partyRoleTypeId="VENDOR"             description="Vendor"/>
+    <OmsPartyRoleType partyRoleTypeId="BILL_TO_CUSTOMER"   description="Bill To Customer"/>
+    <OmsPartyRoleType partyRoleTypeId="SHIP_TO_CUSTOMER"   description="Ship To Customer"/>
+    <OmsPartyRoleType partyRoleTypeId="ORDER_MANAGER"      description="Order Manager"/>
+
+    <!-- Contact Mech Types -->
+    <OmsContactMechType contactMechTypeId="POSTAL_ADDRESS" description="Postal Address"/>
+    <OmsContactMechType contactMechTypeId="TELECOM_NUMBER" description="Telephone Number"/>
+    <OmsContactMechType contactMechTypeId="EMAIL_ADDRESS"  description="Email Address"/>
+
+    <!-- ============================================================ -->
+    <!-- PARTIES                                                      -->
+    <!-- ============================================================ -->
+
+    <!-- John Doe - individual customer -->
+    <OmsParty partyId="PER123" partyTypeId="PERSON"       partyName="John Doe"        emailAddress="john.doe@example.com"/>
+    <!-- ABC Organization - company -->
+    <OmsParty partyId="ORG001" partyTypeId="ORGANIZATION" partyName="ABC Organization" emailAddress="orders@abc.com"/>
+    <!-- TechSupplier Inc - vendor -->
+    <OmsParty partyId="VEN456" partyTypeId="ORGANIZATION" partyName="TechSupplier Inc" emailAddress="supply@techsupplier.com"/>
+
+    <!-- ============================================================ -->
+    <!-- CONTACT MECHANISMS                                           -->
+    <!-- ============================================================ -->
+
+    <!-- Telecom Numbers -->
+    <OmsContactMech contactMechId="10000" contactMechTypeId="TELECOM_NUMBER"/>
+    <OmsTelecomNumber contactMechId="10000" countryCode="+1" areaCode="555" contactNumber="1234567"/>
+
+    <OmsContactMech contactMechId="10001" contactMechTypeId="TELECOM_NUMBER"/>
+    <OmsTelecomNumber contactMechId="10001" countryCode="+1" areaCode="800" contactNumber="9876543"/>
+
+    <!-- Postal Addresses -->
+    <OmsContactMech contactMechId="10002" contactMechTypeId="POSTAL_ADDRESS"/>
+    <OmsPostalAddress contactMechId="10002" toName="TechSupplier Inc" address1="500 Vendor Blvd"
+        city="San Jose" stateProvinceGeoId="CA" postalCode="95101" countryGeoId="USA"/>
+
+    <OmsContactMech contactMechId="10003" contactMechTypeId="POSTAL_ADDRESS"/>
+    <OmsPostalAddress contactMechId="10003" toName="John Doe" address1="123 Main Street"
+        address2="Apt 4B" city="New York" stateProvinceGeoId="NY" postalCode="10001" countryGeoId="USA"/>
+
+    <OmsContactMech contactMechId="10004" contactMechTypeId="POSTAL_ADDRESS"/>
+    <OmsPostalAddress contactMechId="10004" toName="ABC Organization" address1="789 Corporate Ave"
+        city="Chicago" stateProvinceGeoId="IL" postalCode="60601" countryGeoId="USA"/>
+
+    <!-- ============================================================ -->
+    <!-- SALES ORDER - ORD789 (John Doe buying Laptop + Smartphone)  -->
+    <!-- ============================================================ -->
+
+    <OmsOrderHeader orderId="ORD789" orderTypeId="SALES_ORDER" statusId="PARTIALLY_FULFILLED"
+        orderDate="2024-09-19 10:00:00.000" currencyUomId="USD" grandTotal="2519.98"
+        placedByPartyId="PER123" description="John Doe online order - Electronics"/>
+
+    <!-- Part 1: Laptop - COMPLETED -->
+    <OmsOrderPart orderId="ORD789" orderPartSeqId="00001" statusId="COMPLETED"
+        customerPartyId="PER123" postalContactMechId="10003"
+        partTotal="1364.99" estimatedDeliveryDate="2024-09-25 00:00:00.000"/>
+
+    <!-- Part 2: Smartphone - CREATED (pending) -->
+    <OmsOrderPart orderId="ORD789" orderPartSeqId="00002" statusId="CREATED"
+        customerPartyId="PER123" postalContactMechId="10003"
+        partTotal="1154.99" estimatedDeliveryDate="2024-09-30 00:00:00.000"/>
+
+    <!-- Items for Part 1 -->
+    <OmsOrderItem orderId="ORD789" orderItemSeqId="00001" orderPartSeqId="00001"
+        orderItemTypeId="PRODUCT_ORDER_ITEM" productId="PROD20001"
+        quantity="1" unitPrice="1299.99" itemTotal="1299.99" description="Laptop-BLACK"/>
+    <OmsOrderItem orderId="ORD789" orderItemSeqId="00003" orderPartSeqId="00001"
+        orderItemTypeId="ADJUSTMENT_ITEM" productId="SALES_TAX"
+        quantity="1" unitPrice="65.00" itemTotal="65.00" description="Sales Tax - Laptop"/>
+
+    <!-- Items for Part 2 -->
+    <OmsOrderItem orderId="ORD789" orderItemSeqId="00002" orderPartSeqId="00002"
+        orderItemTypeId="PRODUCT_ORDER_ITEM" productId="PROD10002"
+        quantity="1" unitPrice="1099.99" itemTotal="1099.99" description="Smartphone-256GB"/>
+    <OmsOrderItem orderId="ORD789" orderItemSeqId="00004" orderPartSeqId="00002"
+        orderItemTypeId="ADJUSTMENT_ITEM" productId="SALES_TAX"
+        quantity="1" unitPrice="55.00" itemTotal="55.00" description="Sales Tax - Smartphone"/>
+
+    <!-- Adjustments for ORD789 -->
+    <OmsOrderAdjustment orderAdjustmentId="ADJ789-001" orderId="ORD789" orderItemSeqId="00001"
+        orderAdjustmentTypeId="SALES_TAX" description="NY State Sales Tax" amount="65.00"/>
+    <OmsOrderAdjustment orderAdjustmentId="ADJ789-002" orderId="ORD789" orderItemSeqId="00002"
+        orderAdjustmentTypeId="SALES_TAX" description="NY State Sales Tax" amount="55.00"/>
+    <OmsOrderAdjustment orderAdjustmentId="ADJ789-003" orderId="ORD789"
+        orderAdjustmentTypeId="SHIPPING_CHARGE" description="Standard Shipping" amount="9.99"/>
+
+    <!-- Terms for ORD789 -->
+    <OmsOrderTerm orderTermId="TERM789-001" orderId="ORD789" orderTermTypeId="NET_DAYS"
+        termDays="30" description="Net 30 days payment"/>
+
+    <!-- Parties for ORD789 -->
+    <OmsOrderParty orderId="ORD789" partyId="PER123" partyRoleTypeId="CUSTOMER"      fromDate="2024-09-19 10:00:00.000"/>
+    <OmsOrderParty orderId="ORD789" partyId="PER123" partyRoleTypeId="BILL_TO_CUSTOMER" fromDate="2024-09-19 10:00:00.000"/>
+    <OmsOrderParty orderId="ORD789" partyId="PER123" partyRoleTypeId="SHIP_TO_CUSTOMER" fromDate="2024-09-19 10:00:00.000"/>
+    <OmsOrderParty orderId="ORD789" partyId="ORG001" partyRoleTypeId="VENDOR"        fromDate="2024-09-19 10:00:00.000"/>
+
+    <!-- Payment for ORD789 -->
+    <OmsOrderPaymentPref orderPaymentPrefId="PAY789-001" orderId="ORD789"
+        paymentMethodTypeId="CREDIT_CARD" statusId="COMPLETED" maxAmount="2519.98" presentFlag="Y"/>
+
+    <!-- ============================================================ -->
+    <!-- PURCHASE ORDER - ORD123 (ABC Org buying 50 Laptops)         -->
+    <!-- ============================================================ -->
+
+    <OmsOrderHeader orderId="ORD123" orderTypeId="PURCHASE_ORDER" statusId="CREATED"
+        orderDate="2024-09-19 14:00:00.000" currencyUomId="USD" grandTotal="64999.50"
+        placedByPartyId="ORG001" description="ABC Org bulk laptop purchase"/>
+
+    <!-- Part 1: 50 Laptops from TechSupplier -->
+    <OmsOrderPart orderId="ORD123" orderPartSeqId="00001" statusId="PART_PLACED"
+        vendorPartyId="VEN456" postalContactMechId="10002" telecomContactMechId="10000"
+        partTotal="64999.50" estimatedDeliveryDate="2024-10-15 00:00:00.000"/>
+
+    <!-- Item: 50 x Laptop -->
+    <OmsOrderItem orderId="ORD123" orderItemSeqId="00001" orderPartSeqId="00001"
+        orderItemTypeId="PRODUCT_ORDER_ITEM" productId="PROD20001"
+        quantity="50" unitPrice="1299.99" itemTotal="64999.50" description="Laptop-BLACK Bulk"/>
+
+    <!-- Adjustments for ORD123 -->
+    <OmsOrderAdjustment orderAdjustmentId="ADJ123-001" orderId="ORD123"
+        orderAdjustmentTypeId="DISCOUNT" description="Bulk Purchase Discount 5%" amount="-3249.98"/>
+
+    <!-- Terms for ORD123 -->
+    <OmsOrderTerm orderTermId="TERM123-001" orderId="ORD123" orderTermTypeId="NET_DAYS"
+        termDays="60" description="Net 60 days - bulk supplier agreement"/>
+    <OmsOrderTerm orderTermId="TERM123-002" orderId="ORD123" orderTermTypeId="DELIVERY_BY"
+        description="Delivery by Oct 15 2024"/>
+
+    <!-- Parties for ORD123 -->
+    <OmsOrderParty orderId="ORD123" partyId="ORG001" partyRoleTypeId="CUSTOMER"        fromDate="2024-09-19 14:00:00.000"/>
+    <OmsOrderParty orderId="ORD123" partyId="ORG001" partyRoleTypeId="BILL_TO_CUSTOMER" fromDate="2024-09-19 14:00:00.000"/>
+    <OmsOrderParty orderId="ORD123" partyId="VEN456" partyRoleTypeId="VENDOR"          fromDate="2024-09-19 14:00:00.000"/>
+
+    <!-- Payment for ORD123 -->
+    <OmsOrderPaymentPref orderPaymentPrefId="PAY123-001" orderId="ORD123"
+        paymentMethodTypeId="WIRE_TRANSFER" statusId="CREATED" maxAmount="64999.50" presentFlag="N"/>
+
+    <!-- Order Item Association (back-order split example) -->
+    <OmsOrderItemAssoc orderId="ORD789" orderItemSeqId="00002"
+        toOrderId="ORD789" toOrderItemSeqId="00001"
+        orderItemAssocTypeId="SPLIT_FROM" fromDate="2024-09-19 10:00:00.000"/>
+    <!-- ============================================================ -->
+    <!-- RETURNS                                                      -->
+    <!-- ============================================================ -->
+
+    <!-- Defective Product Return - RET123 -->
+    <OmsReturnHeader returnId="RET123" fromPartyId="PER123" toPartyId="ORG001"
+                     returnDate="2024-09-20 00:00:00.000" statusId="RETURN_COMPLETED"/>
+
+    <OmsReturnItem returnId="RET123" returnItemSeqId="00001" orderId="ORD789" orderItemSeqId="00001"
+                   returnQuantity="1" receivedQuantity="1"
+                   returnReasonEnumId="DEFECTIVE" returnResponseEnumId="REFUND" returnPrice="1299.99"/>
+
+    <OmsReturnItem returnId="RET123" returnItemSeqId="00002" orderId="ORD789" orderItemSeqId="00003"
+                   returnPrice="65.00"/>
+    <!-- ============================================================ -->
+    <!-- SHIPMENTS                                                    -->
+    <!-- ============================================================ -->
+
+    <!-- Shipment SHIP001 -->
+    <OmsShipment shipmentId="SHIP001" shipmentTypeEnumId="SALES_SHIPMENT"
+                 fromPartyId="ORG001" toPartyId="PER123"
+                 estimatedShipDate="2024-09-16 00:00:00.000" statusId="PACKED"
+                 estimatedShipCost="15.00" costUomId="USD" binLocationNumber="10"/>
+
+    <OmsShipmentItem shipmentId="SHIP001" shipmentItemSeqId="00001"
+                     productId="PROD20001" quantity="1"/>
+
+    <OmsShipmentPackage shipmentId="SHIP001" shipmentPackageSeqId="00001"
+                        weight="5" weightUomId="LBS"/>
+
+    <OmsShipmentPackageContent shipmentId="SHIP001" shipmentPackageSeqId="00001"
+                               productId="PROD20001" quantity="1"/>
+
+    <OmsShipmentRouteSegment shipmentId="SHIP001" shipmentRouteSegmentSeqId="SEG001"
+                             carrierPartyId="CARRIER001" shipmentMethodEnumId="GROUND"
+                             originPostalContactMechId="10004" destPostalContactMechId="10003"/>
+
+    <OmsShipmentPackageRouteSeg shipmentId="SHIP001" shipmentPackageSeqId="00001"
+                                shipmentRouteSegmentSeqId="SEG001" trackingCode="4455667788"
+                                labelImage="/images/shippingLabel/4455667788.jpeg" labelPrinted="Y"/>
+
+    <OmsShipmentItemSource shipmentId="SHIP001" shipmentItemSeqId="00001"
+                           orderId="ORD789" orderItemSeqId="00001"
+                           productId="PROD20001" quantity="1" statusId="PACKED"/>
+
+</entity-engine-xml>

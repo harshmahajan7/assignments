@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+
+    <!-- ============================================================ -->
+    <!-- REFERENCE / TYPE DATA                                        -->
+    <!-- ============================================================ -->
+
+    <!-- Product Types -->
+    <PimProductType productTypeId="FINISHED_GOOD" description="Finished Good" />
+    <PimProductType productTypeId="DIGITAL_GOOD" description="Digital Good" />
+    <PimProductType productTypeId="MARKETING_PKG" description="Marketing Package" />
+
+    <!-- Product Content Types -->
+    <PimProductContentType productContentTypeId="IMAGE" description="Image" />
+    <PimProductContentType productContentTypeId="DESCRIPTION" description="Description" />
+
+    <!-- Product Price Types -->
+    <PimProductPriceType productPriceTypeId="LIST_PRICE" description="List Price" />
+    <PimProductPriceType productPriceTypeId="PROMO_PRICE" description="Promotional Price" />
+
+    <!-- Units of Measure (weight / length / currency) -->
+    <PimUom uomId="WT_oz" description="Weight in ounces" />
+    <PimUom uomId="WT_lbs" description="Weight in pounds" />
+    <PimUom uomId="WT_g" description="Weight in grams" />
+    <PimUom uomId="WT_kg" description="Weight in kilograms" />
+    <PimUom uomId="LEN_in" description="Length in inches" />
+    <PimUom uomId="LEN_cm" description="Length in centimeters" />
+    <PimUom uomId="USD" description="US Dollar" />
+
+    <!-- Dimension Types -->
+    <PimDimensionType dimensionTypeId="WEIGHT" description="Weight" />
+    <PimDimensionType dimensionTypeId="LENGTH" description="Length" />
+    <PimDimensionType dimensionTypeId="WIDTH" description="Width" />
+    <PimDimensionType dimensionTypeId="HEIGHT" description="Height" />
+
+    <!-- Product Association Types -->
+    <PimProductAssocType productAssocTypeId="PRODUCT_VARIANT" description="Product Variant" />
+    <PimProductAssocType productAssocTypeId="PRODUCT_COMP" description="Product Component" />
+    <PimProductAssocType productAssocTypeId="CROSS_SELL" description="Cross Sell" />
+    <PimProductAssocType productAssocTypeId="UP_SELL" description="Up Sell" />
+
+    <!-- Good Identification Types -->
+    <PimGoodIdentificationType goodIdentificationTypeId="SKU" description="Stock Keeping Unit" />
+    <PimGoodIdentificationType goodIdentificationTypeId="UPCA" description="UPC-A" />
+    <PimGoodIdentificationType goodIdentificationTypeId="ISBN" description="ISBN" />
+    <PimGoodIdentificationType goodIdentificationTypeId="INTERNAL" description="Internal Code" />
+
+    <!-- Product Feature Types -->
+    <PimProductFeatureType productFeatureTypeId="COLOR" description="Color" />
+    <PimProductFeatureType productFeatureTypeId="SIZE" description="Size" />
+    <PimProductFeatureType productFeatureTypeId="STORAGE" description="Storage Capacity" />
+    <PimProductFeatureType productFeatureTypeId="RAM" description="RAM" />
+
+    <!-- Product Category Types -->
+    <PimProductCategoryType productCategoryTypeId="CATALOG" description="Catalog Category" />
+    <PimProductCategoryType productCategoryTypeId="SEARCH" description="Search Category" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT CATEGORIES  (Taxonomy)                              -->
+    <!-- ============================================================ -->
+
+    <PimProductCategory productCategoryId="CAT_ROOT" categoryName="All Products" />
+    <PimProductCategory productCategoryId="CAT_ELECTRONICS" primaryParentCategoryId="CAT_ROOT"
+        categoryName="Electronics" />
+    <PimProductCategory productCategoryId="CAT_MOBILES" primaryParentCategoryId="CAT_ELECTRONICS"
+        categoryName="Mobile Phones" />
+    <PimProductCategory productCategoryId="CAT_LAPTOPS" primaryParentCategoryId="CAT_ELECTRONICS"
+        categoryName="Laptops" />
+    <PimProductCategory productCategoryId="CAT_BUNDLES" primaryParentCategoryId="CAT_ROOT"
+        categoryName="Bundles &amp; Packages" />
+
+    <!-- Category Rollups -->
+    <PimProductCategoryRollup productCategoryId="CAT_ELECTRONICS" parentProductCategoryId="CAT_ROOT"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryRollup productCategoryId="CAT_MOBILES"
+        parentProductCategoryId="CAT_ELECTRONICS" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryRollup productCategoryId="CAT_LAPTOPS"
+        parentProductCategoryId="CAT_ELECTRONICS" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryRollup productCategoryId="CAT_BUNDLES" parentProductCategoryId="CAT_ROOT"
+        fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT FEATURES                                             -->
+    <!-- ============================================================ -->
+
+    <!-- Colors -->
+    <PimProductFeature productFeatureId="FEAT_COLOR_BLACK" productFeatureTypeId="COLOR"
+        description="Black" />
+    <PimProductFeature productFeatureId="FEAT_COLOR_SILVER" productFeatureTypeId="COLOR"
+        description="Silver" />
+    <PimProductFeature productFeatureId="FEAT_COLOR_RED" productFeatureTypeId="COLOR"
+        description="Red" />
+    <PimProductFeature productFeatureId="FEAT_COLOR_WHITE" productFeatureTypeId="COLOR"
+        description="White" />
+
+    <!-- Storage -->
+    <PimProductFeature productFeatureId="FEAT_STG_64GB" productFeatureTypeId="STORAGE"
+        description="64 GB" />
+    <PimProductFeature productFeatureId="FEAT_STG_128GB" productFeatureTypeId="STORAGE"
+        description="128 GB" />
+    <PimProductFeature productFeatureId="FEAT_STG_256GB" productFeatureTypeId="STORAGE"
+        description="256 GB" />
+    <PimProductFeature productFeatureId="FEAT_STG_512GB" productFeatureTypeId="STORAGE"
+        description="512 GB" />
+
+    <!-- RAM -->
+    <PimProductFeature productFeatureId="FEAT_RAM_8GB" productFeatureTypeId="RAM"
+        description="8 GB RAM" />
+    <PimProductFeature productFeatureId="FEAT_RAM_16GB" productFeatureTypeId="RAM"
+        description="16 GB RAM" />
+
+    <!-- Size (clothing kept for existing data) -->
+    <PimProductFeature productFeatureId="FEAT_SIZE_64GB" productFeatureTypeId="SIZE"
+        description="64 GB" />
+    <PimProductFeature productFeatureId="FEAT_SIZE_128GB" productFeatureTypeId="SIZE"
+        description="128 GB" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCTS                                                     -->
+    <!-- ============================================================ -->
+
+    <!-- Smartphone — Virtual parent -->
+    <PimProduct productId="PROD10000" productTypeId="FINISHED_GOOD" productName="Smartphone"
+        isVirtual="Y" isVariant="N" fromDate="2023-01-01 00:00:00.000" />
+    <!-- Smartphone — Variants -->
+    <PimProduct productId="PROD10001" productTypeId="FINISHED_GOOD" productName="Smartphone-128GB"
+        isVirtual="N" isVariant="Y" fromDate="2023-01-01 00:00:00.000" />
+    <PimProduct productId="PROD10002" productTypeId="FINISHED_GOOD" productName="Smartphone-256GB"
+        isVirtual="N" isVariant="Y" fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- Laptop — Virtual parent -->
+    <PimProduct productId="PROD20000" productTypeId="FINISHED_GOOD" productName="Laptop"
+        isVirtual="Y" isVariant="N" fromDate="2023-09-01 00:00:00.000" />
+    <!-- Laptop — Variant -->
+    <PimProduct productId="PROD20001" productTypeId="FINISHED_GOOD" productName="Laptop-BLACK"
+        isVirtual="N" isVariant="Y" fromDate="2023-09-01 00:00:00.000" />
+
+    <!-- Promotional Marketing Package -->
+    <PimProduct productId="PROM001" productTypeId="MARKETING_PKG"
+        productName="Laptop-Phone-Promotional-Package"
+        isVirtual="N" isVariant="N" fromDate="2023-10-01 00:00:00.000" />
+
+    <!-- Existing demo products -->
+    <PimProduct productId="PROD_IPHONE13" productTypeId="FINISHED_GOOD" productName="iPhone 13"
+        isVirtual="N" isVariant="N" fromDate="2024-01-01 00:00:00.000" />
+    <PimProduct productId="PROD_MACBOOK" productTypeId="FINISHED_GOOD" productName="MacBook Pro"
+        isVirtual="N" isVariant="N" fromDate="2024-01-01 00:00:00.000" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT CONTENT                                              -->
+    <!-- ============================================================ -->
+
+    <PimProductContent productContentId="CON100" productId="PROD10000"
+        productContentTypeId="IMAGE" contentLocation="/images/smartphone.jpg" />
+    <PimProductContent productContentId="CON200" productId="PROD10000"
+        productContentTypeId="DESCRIPTION" contentLocation="/descriptions/smartphone_en.txt" />
+    <PimProductContent productContentId="CON300" productId="PROD20000"
+        productContentTypeId="IMAGE" contentLocation="/images/laptop.jpg" />
+    <PimProductContent productContentId="CON400" productId="PROD20000"
+        productContentTypeId="DESCRIPTION" contentLocation="/descriptions/laptop_en.txt" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT PRICES                                               -->
+    <!-- ============================================================ -->
+
+    <PimProductPrice productPriceId="PRC_PHN1" productId="PROD10001" productPriceTypeId="LIST_PRICE"
+        currencyUomId="USD" price="799.99" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductPrice productPriceId="PRC_PHN2" productId="PROD10002" productPriceTypeId="LIST_PRICE"
+        currencyUomId="USD" price="1099.99" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductPrice productPriceId="PRC_PHN1_PROM1" productId="PROD10002"
+        productPriceTypeId="PROMO_PRICE"
+        currencyUomId="USD" price="999.99" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductPrice productPriceId="PRC_LPT1" productId="PROD20000" productPriceTypeId="LIST_PRICE"
+        currencyUomId="USD" price="1299.99" fromDate="2023-09-01 00:00:00.000" />
+    <PimProductPrice productPriceId="PRC_PHN_LPT_PROM1" productId="PROM001"
+        productPriceTypeId="PROMO_PRICE"
+        currencyUomId="USD" price="1999.99" fromDate="2023-10-01 00:00:00.000" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT DIMENSIONS                                           -->
+    <!-- ============================================================ -->
+
+    <PimProductDimension productId="PROD10000" dimensionTypeId="WEIGHT" dimensionValue="6.60"
+        uomId="WT_oz" />
+    <PimProductDimension productId="PROD10001" dimensionTypeId="WEIGHT" dimensionValue="2.5"
+        uomId="WT_lbs" />
+    <PimProductDimension productId="PROD20000" dimensionTypeId="WEIGHT" dimensionValue="4.5"
+        uomId="WT_lbs" />
+    <PimProductDimension productId="PROD20001" dimensionTypeId="WEIGHT" dimensionValue="4.5"
+        uomId="WT_lbs" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT ASSOCIATIONS                                         -->
+    <!-- ============================================================ -->
+
+    <!-- Smartphone virtual → variants -->
+    <PimProductAssoc productId="PROD10000" toProductId="PROD10001"
+        productAssocTypeId="PRODUCT_VARIANT" fromDate="2023-01-01 00:00:00.000" />
+    <PimProductAssoc productId="PROD10000" toProductId="PROD10002"
+        productAssocTypeId="PRODUCT_VARIANT" fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- Laptop virtual → variant -->
+    <PimProductAssoc productId="PROD20000" toProductId="PROD20001"
+        productAssocTypeId="PRODUCT_VARIANT" fromDate="2023-09-01 00:00:00.000" />
+
+    <!-- Promotional package components -->
+    <PimProductAssoc productId="PROM001" toProductId="PROD10001"
+        productAssocTypeId="PRODUCT_COMP" fromDate="2023-10-01 00:00:00.000" />
+    <PimProductAssoc productId="PROM001" toProductId="PROD20001"
+        productAssocTypeId="PRODUCT_COMP" fromDate="2023-10-01 00:00:00.000" />
+
+    <!-- Cross/Up sell -->
+    <PimProductAssoc productId="PROD10001" toProductId="PROD10002"
+        productAssocTypeId="UP_SELL" fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- ============================================================ -->
+    <!-- GOOD IDENTIFICATIONS  (Non-Mutually Exclusive Subtypes)     -->
+    <!-- ============================================================ -->
+
+    <PimGoodIdentification goodIdentificationTypeId="SKU" productId="PROD10001" idValue="SKU-SM-128" />
+    <PimGoodIdentification goodIdentificationTypeId="SKU" productId="PROD10002" idValue="SKU-SM-256" />
+    <PimGoodIdentification goodIdentificationTypeId="UPCA" productId="PROD10001"
+        idValue="012345678901" />
+    <PimGoodIdentification goodIdentificationTypeId="UPCA" productId="PROD10002"
+        idValue="012345678902" />
+    <PimGoodIdentification goodIdentificationTypeId="SKU" productId="PROD20001"
+        idValue="SKU-LPT-BLK" />
+    <PimGoodIdentification goodIdentificationTypeId="UPCA" productId="PROD20001"
+        idValue="012345679001" />
+    <PimGoodIdentification goodIdentificationTypeId="SKU" productId="PROD_IPHONE13"
+        idValue="SKU-IPH-13" />
+    <PimGoodIdentification goodIdentificationTypeId="SKU" productId="PROD_MACBOOK"
+        idValue="SKU-MBP-01" />
+    <PimGoodIdentification goodIdentificationTypeId="INTERNAL" productId="PROM001"
+        idValue="INT-PROM-001" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT CATEGORY MEMBERSHIPS                                 -->
+    <!-- ============================================================ -->
+
+    <PimProductCategoryMember productCategoryId="CAT_MOBILES" productId="PROD10000"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_MOBILES" productId="PROD10001"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_MOBILES" productId="PROD10002"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_LAPTOPS" productId="PROD20000"
+        fromDate="2023-09-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_LAPTOPS" productId="PROD20001"
+        fromDate="2023-09-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_BUNDLES" productId="PROM001"
+        fromDate="2023-10-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_MOBILES" productId="PROD_IPHONE13"
+        fromDate="2024-01-01 00:00:00.000" />
+    <PimProductCategoryMember productCategoryId="CAT_LAPTOPS" productId="PROD_MACBOOK"
+        fromDate="2024-01-01 00:00:00.000" />
+
+    <!-- ============================================================ -->
+    <!-- PRODUCT FEATURE APPLICATIONS                                  -->
+    <!-- ============================================================ -->
+
+    <!-- Smartphone-128GB: Black + 128GB storage -->
+    <PimProductFeatureAppl productId="PROD10001" productFeatureId="FEAT_COLOR_BLACK"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD10001" productFeatureId="FEAT_STG_128GB"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD10001" productFeatureId="FEAT_RAM_8GB"
+        fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- Smartphone-256GB: Silver + 256GB storage -->
+    <PimProductFeatureAppl productId="PROD10002" productFeatureId="FEAT_COLOR_SILVER"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD10002" productFeatureId="FEAT_STG_256GB"
+        fromDate="2023-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD10002" productFeatureId="FEAT_RAM_8GB"
+        fromDate="2023-01-01 00:00:00.000" />
+
+    <!-- Laptop-BLACK: Black + 512GB + 16GB RAM -->
+    <PimProductFeatureAppl productId="PROD20001" productFeatureId="FEAT_COLOR_BLACK"
+        fromDate="2023-09-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD20001" productFeatureId="FEAT_STG_512GB"
+        fromDate="2023-09-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD20001" productFeatureId="FEAT_RAM_16GB"
+        fromDate="2023-09-01 00:00:00.000" />
+
+    <!-- iPhone 13 -->
+    <PimProductFeatureAppl productId="PROD_IPHONE13" productFeatureId="FEAT_COLOR_RED"
+        fromDate="2024-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD_IPHONE13" productFeatureId="FEAT_SIZE_128GB"
+        fromDate="2024-01-01 00:00:00.000" />
+
+    <!-- MacBook Pro -->
+    <PimProductFeatureAppl productId="PROD_MACBOOK" productFeatureId="FEAT_COLOR_SILVER"
+        fromDate="2024-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD_MACBOOK" productFeatureId="FEAT_STG_512GB"
+        fromDate="2024-01-01 00:00:00.000" />
+    <PimProductFeatureAppl productId="PROD_MACBOOK" productFeatureId="FEAT_RAM_16GB"
+        fromDate="2024-01-01 00:00:00.000" />
+
+</entity-engine-xml>

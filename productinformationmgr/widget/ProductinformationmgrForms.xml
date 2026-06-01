@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- Product Forms -->
+    <form name="FindPimProduct" type="single" target="FindPimProduct" default-entity-name="PimProduct">
+        <auto-fields-entity entity-name="PimProduct" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPimProducts" type="list" list-name="listIt" paginate-target="FindPimProduct" default-entity-name="PimProduct" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PimProduct"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PimProduct" default-field-type="display"/>
+        <field name="productId" title="Product ID" widget-style="buttontext">
+            <hyperlink description="${productId}" target="EditPimProduct" also-hidden="false">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deletePimProduct" also-hidden="false">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditPimProduct" type="single" target="updatePimProduct" default-entity-name="PimProduct" default-map-name="pimProduct">
+        <alt-target use-when="pimProduct==null" target="createPimProduct"/>
+        <auto-fields-entity entity-name="PimProduct" default-field-type="edit"/>
+        <field name="productId" use-when="pimProduct!=null" title="Product ID"><display/></field>
+        <field name="productId" use-when="pimProduct==null" title="Product ID"><text/></field>
+        <field name="productTypeId" title="Product Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PimProductType" key-field-name="productTypeId" description="${description} [${productTypeId}]"/>
+            </drop-down>
+        </field>
+        <field name="isVirtual" title="Is Virtual">
+            <drop-down allow-empty="true">
+                <option key="Y" description="Yes"/>
+                <option key="N" description="No"/>
+            </drop-down>
+        </field>
+        <field name="isVariant" title="Is Variant">
+            <drop-down allow-empty="true">
+                <option key="Y" description="Yes"/>
+                <option key="N" description="No"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Features Forms -->
+    <form name="FindPimProductFeature" type="single" target="FindPimProductFeature" default-entity-name="PimProductFeature">
+        <auto-fields-entity entity-name="PimProductFeature" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPimProductFeatures" type="list" list-name="listIt" paginate-target="FindPimProductFeature" default-entity-name="PimProductFeature" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PimProductFeature"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PimProductFeature" default-field-type="display"/>
+        <field name="productFeatureId" title="Feature ID" widget-style="buttontext">
+            <hyperlink description="${productFeatureId}" target="EditPimProductFeature" also-hidden="false">
+                <parameter param-name="productFeatureId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deletePimProductFeature" also-hidden="false">
+                <parameter param-name="productFeatureId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditPimProductFeature" type="single" target="updatePimProductFeature" default-entity-name="PimProductFeature" default-map-name="pimProductFeature">
+        <alt-target use-when="pimProductFeature==null" target="createPimProductFeature"/>
+        <auto-fields-entity entity-name="PimProductFeature" default-field-type="edit"/>
+        <field name="productFeatureId" use-when="pimProductFeature!=null" title="Feature ID"><display/></field>
+        <field name="productFeatureId" use-when="pimProductFeature==null" title="Feature ID"><text/></field>
+        <field name="productFeatureTypeId" title="Feature Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PimProductFeatureType" key-field-name="productFeatureTypeId" description="${description} [${productFeatureTypeId}]"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Categories Forms -->
+    <form name="FindPimProductCategory" type="single" target="FindPimProductCategory" default-entity-name="PimProductCategory">
+        <auto-fields-entity entity-name="PimProductCategory" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPimProductCategories" type="list" list-name="listIt" paginate-target="FindPimProductCategory" default-entity-name="PimProductCategory" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PimProductCategory"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PimProductCategory" default-field-type="display"/>
+        <field name="productCategoryId" title="Category ID" widget-style="buttontext">
+            <hyperlink description="${productCategoryId}" target="EditPimProductCategory" also-hidden="false">
+                <parameter param-name="productCategoryId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deletePimProductCategory" also-hidden="false">
+                <parameter param-name="productCategoryId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditPimProductCategory" type="single" target="updatePimProductCategory" default-entity-name="PimProductCategory" default-map-name="pimProductCategory">
+        <alt-target use-when="pimProductCategory==null" target="createPimProductCategory"/>
+        <auto-fields-entity entity-name="PimProductCategory" default-field-type="edit"/>
+        <field name="productCategoryId" use-when="pimProductCategory!=null" title="Category ID"><display/></field>
+        <field name="productCategoryId" use-when="pimProductCategory==null" title="Category ID"><text/></field>
+        <field name="productCategoryTypeId" title="Category Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PimProductCategoryType" key-field-name="productCategoryTypeId" description="${description} [${productCategoryTypeId}]"/>
+            </drop-down>
+        </field>
+        <field name="primaryParentCategoryId" title="Primary Parent Category">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PimProductCategory" key-field-name="productCategoryId" description="${categoryName} [${productCategoryId}]"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Catalog Forms -->
+    <form name="FindPimProdCatalog" type="single" target="FindPimProdCatalog" default-entity-name="PimProdCatalog">
+        <auto-fields-entity entity-name="PimProdCatalog" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPimProdCatalogs" type="list" list-name="listIt" paginate-target="FindPimProdCatalog" default-entity-name="PimProdCatalog" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PimProdCatalog"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PimProdCatalog" default-field-type="display"/>
+        <field name="prodCatalogId" title="Catalog ID" widget-style="buttontext">
+            <hyperlink description="${prodCatalogId}" target="EditPimProdCatalog" also-hidden="false">
+                <parameter param-name="prodCatalogId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deletePimProdCatalog" also-hidden="false">
+                <parameter param-name="prodCatalogId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditPimProdCatalog" type="single" target="updatePimProdCatalog" default-entity-name="PimProdCatalog" default-map-name="pimProdCatalog">
+        <alt-target use-when="pimProdCatalog==null" target="createPimProdCatalog"/>
+        <auto-fields-entity entity-name="PimProdCatalog" default-field-type="edit"/>
+        <field name="prodCatalogId" use-when="pimProdCatalog!=null" title="Catalog ID"><display/></field>
+        <field name="prodCatalogId" use-when="pimProdCatalog==null" title="Catalog ID"><text/></field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Catalog Category Forms -->
+    <form name="AddPimProdCatalogCategory" type="single" target="createPimProdCatalogCategory" default-entity-name="PimProdCatalogCategory">
+        <field name="prodCatalogId"><hidden value="${parameters.prodCatalogId}"/></field>
+        <field name="productCategoryId" title="Category">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PimProductCategory" key-field-name="productCategoryId" description="${categoryName} [${productCategoryId}]"/>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="Add Category"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="ListPimProdCatalogCategories" type="list" list-name="catalogCategories" target="updatePimProdCatalogCategory" default-entity-name="PimProdCatalogCategory" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PimProdCatalogCategory">
+                <condition-expr field-name="prodCatalogId" from-field="parameters.prodCatalogId"/>
+                <order-by field-name="-fromDate"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="PimProdCatalogCategory" default-field-type="display"/>
+        <field name="prodCatalogId"><hidden/></field>
+        <field name="productCategoryId" title="Category">
+            <display-entity entity-name="PimProductCategory" key-field-name="productCategoryId" description="${categoryName} [${productCategoryId}]"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Remove" target="deletePimProdCatalogCategory" also-hidden="false">
+                <parameter param-name="prodCatalogId"/>
+                <parameter param-name="productCategoryId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+
+</forms>

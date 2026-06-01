@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- ============================================================ -->
+    <!-- ORDER HEADER FORMS                                           -->
+    <!-- ============================================================ -->
+
+    <form name="FindOmsOrderHeader" type="single" target="FindOmsOrderHeader" default-entity-name="OmsOrderHeader">
+        <auto-fields-entity entity-name="OmsOrderHeader" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListOmsOrderHeaders" type="list" list-name="listIt" paginate-target="FindOmsOrderHeader"
+            default-entity-name="OmsOrderHeader" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OmsOrderHeader"/>
+                <field-map field-name="orderBy" value="-orderDate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderHeader" default-field-type="display"/>
+        <field name="orderId" title="Order ID" widget-style="buttontext">
+            <hyperlink description="${orderId}" target="EditOmsOrderHeader" also-hidden="false">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderTypeId" title="Type">
+            <display-entity entity-name="OmsOrderType" key-field-name="orderTypeId" description="${description}"/>
+        </field>
+        <field name="statusId" title="Status">
+            <display-entity entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderHeader" also-hidden="false">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditOmsOrderHeader" type="single" target="updateOmsOrderHeader"
+            default-entity-name="OmsOrderHeader" default-map-name="omsOrderHeader">
+        <alt-target use-when="omsOrderHeader==null" target="createOmsOrderHeader"/>
+        <auto-fields-entity entity-name="OmsOrderHeader" default-field-type="edit"/>
+        <field name="orderId" use-when="omsOrderHeader!=null" title="Order ID"><display/></field>
+        <field name="orderId" use-when="omsOrderHeader==null" title="Order ID"><text/></field>
+        <field name="orderTypeId" title="Order Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsOrderType" key-field-name="orderTypeId" description="${description} [${orderTypeId}]"/>
+            </drop-down>
+        </field>
+        <field name="statusId" title="Status">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description} [${statusId}]"/>
+            </drop-down>
+        </field>
+        <field name="placedByPartyId" title="Placed By">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsParty" key-field-name="partyId" description="${partyName} [${partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="orderDate" title="Order Date"><date-time type="timestamp"/></field>
+        <field name="currencyUomId" title="Currency"><text/></field>
+        <field name="grandTotal" title="Grand Total"><text/></field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER PART FORMS                                             -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderParts" type="list" list-name="orderParts"
+            default-entity-name="OmsOrderPart" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderPart">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+                <order-by field-name="orderPartSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderPart" default-field-type="display"/>
+        <field name="orderId"><hidden/></field>
+        <field name="statusId" title="Status">
+            <display-entity entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description}"/>
+        </field>
+        <field name="customerPartyId" title="Customer">
+            <display-entity entity-name="OmsParty" key-field-name="partyId" description="${partyName}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderPart" also-hidden="false">
+                <parameter param-name="orderId"/>
+                <parameter param-name="orderPartSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderPart" type="single" target="createOmsOrderPart" default-entity-name="OmsOrderPart">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="orderPartSeqId" title="Part Seq ID"><text/></field>
+        <field name="statusId" title="Status">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description} [${statusId}]"/>
+            </drop-down>
+        </field>
+        <field name="customerPartyId" title="Customer Party">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsParty" key-field-name="partyId" description="${partyName} [${partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="vendorPartyId" title="Vendor Party">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsParty" key-field-name="partyId" description="${partyName} [${partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="postalContactMechId" title="Postal Address">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsContactMech" key-field-name="contactMechId" description="${contactMechId}">
+                    <entity-constraint name="contactMechTypeId" value="POSTAL_ADDRESS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partTotal" title="Part Total"><text/></field>
+        <field name="estimatedDeliveryDate" title="Est. Delivery Date"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="Add Part"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER ITEM FORMS                                             -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderItems" type="list" list-name="orderItems"
+            default-entity-name="OmsOrderItem" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderItem">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+                <order-by field-name="orderItemSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderItem" default-field-type="display"/>
+        <field name="orderId"><hidden/></field>
+        <field name="orderItemTypeId" title="Item Type">
+            <display-entity entity-name="OmsOrderItemType" key-field-name="orderItemTypeId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderItem" also-hidden="false">
+                <parameter param-name="orderId"/>
+                <parameter param-name="orderItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderItem" type="single" target="createOmsOrderItem" default-entity-name="OmsOrderItem">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="orderItemSeqId" title="Item Seq ID"><text/></field>
+        <field name="orderPartSeqId" title="Part Seq ID"><text/></field>
+        <field name="orderItemTypeId" title="Item Type">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsOrderItemType" key-field-name="orderItemTypeId" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="productId" title="Product ID"><text/></field>
+        <field name="quantity" title="Quantity"><text/></field>
+        <field name="unitPrice" title="Unit Price"><text/></field>
+        <field name="itemTotal" title="Item Total"><text/></field>
+        <field name="description" title="Description"><text/></field>
+        <field name="submitButton" title="Add Item"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER ADJUSTMENT FORMS                                       -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderAdjustments" type="list" list-name="adjustments"
+            default-entity-name="OmsOrderAdjustment" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderAdjustment">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderAdjustment" default-field-type="display"/>
+        <field name="orderAdjustmentTypeId" title="Adjustment Type">
+            <display-entity entity-name="OmsOrderAdjustmentType" key-field-name="orderAdjustmentTypeId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderAdjustment" also-hidden="false">
+                <parameter param-name="orderAdjustmentId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderAdjustment" type="single" target="createOmsOrderAdjustment" default-entity-name="OmsOrderAdjustment">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="orderAdjustmentTypeId" title="Adjustment Type">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="OmsOrderAdjustmentType" key-field-name="orderAdjustmentTypeId" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="orderItemSeqId" title="Item Seq ID (optional)"><text/></field>
+        <field name="description" title="Description"><text/></field>
+        <field name="amount" title="Amount"><text/></field>
+        <field name="submitButton" title="Add Adjustment"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER TERM FORMS                                             -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderTerms" type="list" list-name="terms"
+            default-entity-name="OmsOrderTerm" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderTerm">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderTerm" default-field-type="display"/>
+        <field name="orderTermTypeId" title="Term Type">
+            <display-entity entity-name="OmsOrderTermType" key-field-name="orderTermTypeId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderTerm" also-hidden="false">
+                <parameter param-name="orderTermId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderTerm" type="single" target="createOmsOrderTerm" default-entity-name="OmsOrderTerm">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="orderTermTypeId" title="Term Type">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="OmsOrderTermType" key-field-name="orderTermTypeId" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="termValue" title="Term Value"><text/></field>
+        <field name="termDays" title="Term Days"><text/></field>
+        <field name="description" title="Description"><text/></field>
+        <field name="submitButton" title="Add Term"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER PARTIES FORMS                                          -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderParties" type="list" list-name="orderParties"
+            default-entity-name="OmsOrderParty" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderParty">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+                <order-by field-name="partyRoleTypeId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderParty" default-field-type="display"/>
+        <field name="partyId" title="Party">
+            <display-entity entity-name="OmsParty" key-field-name="partyId" description="${partyName} [${partyId}]"/>
+        </field>
+        <field name="partyRoleTypeId" title="Role">
+            <display-entity entity-name="OmsPartyRoleType" key-field-name="partyRoleTypeId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Remove" target="deleteOmsOrderParty" also-hidden="false">
+                <parameter param-name="orderId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="partyRoleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderParty" type="single" target="createOmsOrderParty" default-entity-name="OmsOrderParty">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="partyId" title="Party">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="OmsParty" key-field-name="partyId" description="${partyName} [${partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="partyRoleTypeId" title="Role">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="OmsPartyRoleType" key-field-name="partyRoleTypeId" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="From Date"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="Add Party"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- ORDER PAYMENT FORMS                                          -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsOrderPayments" type="list" list-name="payments"
+            default-entity-name="OmsOrderPaymentPref" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsOrderPaymentPref">
+                <condition-expr field-name="orderId" from-field="parameters.orderId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsOrderPaymentPref" default-field-type="display"/>
+        <field name="statusId" title="Status">
+            <display-entity entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description}"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsOrderPaymentPref" also-hidden="false">
+                <parameter param-name="orderPaymentPrefId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsOrderPayment" type="single" target="createOmsOrderPaymentPref" default-entity-name="OmsOrderPaymentPref">
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="paymentMethodTypeId" title="Payment Method"><text/></field>
+        <field name="statusId" title="Status">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OmsOrderStatusType" key-field-name="statusId" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="maxAmount" title="Amount"><text/></field>
+        <field name="presentFlag" title="Card Present">
+            <drop-down allow-empty="true">
+                <option key="Y" description="Yes"/>
+                <option key="N" description="No"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="Add Payment"><submit button-type="button"/></field>
+    </form>
+    <!-- ============================================================ -->
+    <!-- RETURN HEADER FORMS                                          -->
+    <!-- ============================================================ -->
+
+    <form name="FindOmsReturnHeader" type="single" target="FindOmsReturnHeader" default-entity-name="OmsReturnHeader">
+        <auto-fields-entity entity-name="OmsReturnHeader" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListOmsReturnHeaders" type="list" list-name="listIt" paginate-target="FindOmsReturnHeader"
+            default-entity-name="OmsReturnHeader" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OmsReturnHeader"/>
+                <field-map field-name="orderBy" value="-returnDate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OmsReturnHeader" default-field-type="display"/>
+        <field name="returnId" title="Return ID" widget-style="buttontext">
+            <hyperlink description="${returnId}" target="EditOmsReturnHeader" also-hidden="false">
+                <parameter param-name="returnId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsReturnHeader" also-hidden="false">
+                <parameter param-name="returnId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditOmsReturnHeader" type="single" target="updateOmsReturnHeader"
+            default-entity-name="OmsReturnHeader" default-map-name="omsReturnHeader">
+        <alt-target use-when="omsReturnHeader==null" target="createOmsReturnHeader"/>
+        <auto-fields-entity entity-name="OmsReturnHeader" default-field-type="edit"/>
+        <field name="returnId" use-when="omsReturnHeader!=null" title="Return ID"><display/></field>
+        <field name="returnId" use-when="omsReturnHeader==null" title="Return ID"><text/></field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- ============================================================ -->
+    <!-- RETURN ITEM FORMS                                            -->
+    <!-- ============================================================ -->
+
+    <form name="ListOmsReturnItems" type="list" list-name="returnItems"
+            default-entity-name="OmsReturnItem" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsReturnItem">
+                <condition-expr field-name="returnId" from-field="parameters.returnId"/>
+                <order-by field-name="returnItemSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsReturnItem" default-field-type="display"/>
+        <field name="returnId"><hidden/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsReturnItem" also-hidden="false">
+                <parameter param-name="returnId"/>
+                <parameter param-name="returnItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsReturnItem" type="single" target="createOmsReturnItem" default-entity-name="OmsReturnItem">
+        <field name="returnId"><hidden value="${parameters.returnId}"/></field>
+        <field name="returnItemSeqId" title="Return Item Seq ID"><text/></field>
+        <field name="orderId" title="Order ID"><text/></field>
+        <field name="orderItemSeqId" title="Order Item Seq ID"><text/></field>
+        <field name="returnQuantity" title="Return Quantity"><text/></field>
+        <field name="receivedQuantity" title="Received Quantity"><text/></field>
+        <field name="returnReasonEnumId" title="Return Reason Enum ID"><text/></field>
+        <field name="returnResponseEnumId" title="Return Response Enum ID"><text/></field>
+        <field name="returnPrice" title="Return Price"><text/></field>
+        <field name="submitButton" title="Add Return Item"><submit button-type="button"/></field>
+    </form>
+    <!-- ============================================================ -->
+    <!-- SHIPMENT FORMS                                               -->
+    <!-- ============================================================ -->
+
+    <!-- Shipment Header Forms -->
+    <form name="FindOmsShipment" type="single" target="FindOmsShipment" default-entity-name="OmsShipment">
+        <auto-fields-entity entity-name="OmsShipment" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="searchButton" title="Search"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListOmsShipments" type="list" list-name="listIt" paginate-target="FindOmsShipment"
+            default-entity-name="OmsShipment" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OmsShipment"/>
+                <field-map field-name="orderBy" value="-estimatedShipDate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OmsShipment" default-field-type="display"/>
+        <field name="shipmentId" title="Shipment ID" widget-style="buttontext">
+            <hyperlink description="${shipmentId}" target="EditOmsShipment" also-hidden="false">
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsShipment" also-hidden="false">
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditOmsShipment" type="single" target="updateOmsShipment"
+            default-entity-name="OmsShipment" default-map-name="omsShipment">
+        <alt-target use-when="omsShipment==null" target="createOmsShipment"/>
+        <auto-fields-entity entity-name="OmsShipment" default-field-type="edit"/>
+        <field name="shipmentId" use-when="omsShipment!=null" title="Shipment ID"><display/></field>
+        <field name="shipmentId" use-when="omsShipment==null" title="Shipment ID"><text/></field>
+        <field name="submitButton" title="Save"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Shipment Item Forms -->
+    <form name="ListOmsShipmentItems" type="list" list-name="shipmentItems"
+            default-entity-name="OmsShipmentItem" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsShipmentItem">
+                <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+                <order-by field-name="shipmentItemSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsShipmentItem" default-field-type="display"/>
+        <field name="shipmentId"><hidden/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsShipmentItem" also-hidden="false">
+                <parameter param-name="shipmentId"/>
+                <parameter param-name="shipmentItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsShipmentItem" type="single" target="createOmsShipmentItem" default-entity-name="OmsShipmentItem">
+        <field name="shipmentId"><hidden value="${parameters.shipmentId}"/></field>
+        <field name="shipmentItemSeqId" title="Seq ID"><text/></field>
+        <field name="productId" title="Product ID"><text/></field>
+        <field name="quantity" title="Quantity"><text/></field>
+        <field name="submitButton" title="Add Item"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Shipment Package Forms -->
+    <form name="ListOmsShipmentPackages" type="list" list-name="shipmentPackages"
+            default-entity-name="OmsShipmentPackage" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsShipmentPackage">
+                <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+                <order-by field-name="shipmentPackageSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsShipmentPackage" default-field-type="display"/>
+        <field name="shipmentId"><hidden/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsShipmentPackage" also-hidden="false">
+                <parameter param-name="shipmentId"/>
+                <parameter param-name="shipmentPackageSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsShipmentPackage" type="single" target="createOmsShipmentPackage" default-entity-name="OmsShipmentPackage">
+        <field name="shipmentId"><hidden value="${parameters.shipmentId}"/></field>
+        <field name="shipmentPackageSeqId" title="Package Seq ID"><text/></field>
+        <field name="weight" title="Weight"><text/></field>
+        <field name="weightUomId" title="Weight UOM"><text/></field>
+        <field name="submitButton" title="Add Package"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Shipment Route Segment Forms -->
+    <form name="ListOmsShipmentRouteSegments" type="list" list-name="shipmentRouteSegments"
+            default-entity-name="OmsShipmentRouteSegment" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OmsShipmentRouteSegment">
+                <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+                <order-by field-name="shipmentRouteSegmentSeqId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="OmsShipmentRouteSegment" default-field-type="display"/>
+        <field name="shipmentId"><hidden/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="Delete" target="deleteOmsShipmentRouteSegment" also-hidden="false">
+                <parameter param-name="shipmentId"/>
+                <parameter param-name="shipmentRouteSegmentSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddOmsShipmentRouteSegment" type="single" target="createOmsShipmentRouteSegment" default-entity-name="OmsShipmentRouteSegment">
+        <field name="shipmentId"><hidden value="${parameters.shipmentId}"/></field>
+        <field name="shipmentRouteSegmentSeqId" title="Route Segment Seq ID"><text/></field>
+        <field name="carrierPartyId" title="Carrier Party ID"><text/></field>
+        <field name="shipmentMethodEnumId" title="Shipment Method"><text/></field>
+        <field name="originPostalContactMechId" title="Origin Postal ID"><text/></field>
+        <field name="destPostalContactMechId" title="Dest Postal ID"><text/></field>
+        <field name="submitButton" title="Add Route Segment"><submit button-type="button"/></field>
+    </form>
+
+</forms>

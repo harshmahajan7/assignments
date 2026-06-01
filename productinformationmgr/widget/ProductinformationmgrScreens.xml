@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="main">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/><!-- this highlights the selected menu-item with name "main" -->
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindPimProduct">
+        <section>
+            <actions>
+                <set field="headerItem" value="Products"/>
+                <set field="titleProperty" value="Products"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditPimProduct" text="New Product" style="buttontext create"/>
+                        </container>
+                        <screenlet title="Find Products">
+                            <include-form name="FindPimProduct" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                        <screenlet title="Products List">
+                            <include-form name="ListPimProducts" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPimProduct">
+        <section>
+            <actions>
+                <set field="headerItem" value="Products"/>
+                <set field="titleProperty" value="Edit Product"/>
+                <set field="productId" from-field="parameters.productId"/>
+                <entity-one entity-name="PimProduct" value-field="pimProduct"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="Edit Product">
+                            <include-form name="EditPimProduct" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindPimProductFeature">
+        <section>
+            <actions>
+                <set field="headerItem" value="ProductFeatures"/>
+                <set field="titleProperty" value="Product Features"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditPimProductFeature" text="New Product Feature" style="buttontext create"/>
+                        </container>
+                        <screenlet title="Find Product Features">
+                            <include-form name="FindPimProductFeature" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                        <screenlet title="Product Features List">
+                            <include-form name="ListPimProductFeatures" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPimProductFeature">
+        <section>
+            <actions>
+                <set field="headerItem" value="ProductFeatures"/>
+                <set field="titleProperty" value="Edit Product Feature"/>
+                <set field="productFeatureId" from-field="parameters.productFeatureId"/>
+                <entity-one entity-name="PimProductFeature" value-field="pimProductFeature"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="Edit Product Feature">
+                            <include-form name="EditPimProductFeature" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindPimProductCategory">
+        <section>
+            <actions>
+                <set field="headerItem" value="ProductCategories"/>
+                <set field="titleProperty" value="Product Categories"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditPimProductCategory" text="New Product Category" style="buttontext create"/>
+                        </container>
+                        <screenlet title="Find Product Categories">
+                            <include-form name="FindPimProductCategory" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                        <screenlet title="Product Categories List">
+                            <include-form name="ListPimProductCategories" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPimProductCategory">
+        <section>
+            <actions>
+                <set field="headerItem" value="ProductCategories"/>
+                <set field="titleProperty" value="Edit Product Category"/>
+                <set field="productCategoryId" from-field="parameters.productCategoryId"/>
+                <entity-one entity-name="PimProductCategory" value-field="pimProductCategory"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="Edit Product Category">
+                            <include-form name="EditPimProductCategory" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindPimProdCatalog">
+        <section>
+            <actions>
+                <set field="headerItem" value="Catalogs"/>
+                <set field="titleProperty" value="Catalogs"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditPimProdCatalog" text="New Catalog" style="buttontext create"/>
+                        </container>
+                        <screenlet title="Find Catalogs">
+                            <include-form name="FindPimProdCatalog" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                        <screenlet title="Catalogs List">
+                            <include-form name="ListPimProdCatalogs" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPimProdCatalog">
+        <section>
+            <actions>
+                <set field="headerItem" value="Catalogs"/>
+                <set field="titleProperty" value="Edit Catalog"/>
+                <set field="prodCatalogId" from-field="parameters.prodCatalogId"/>
+                <entity-one entity-name="PimProdCatalog" value-field="pimProdCatalog"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ProductinformationmgrCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="Edit Catalog">
+                            <include-form name="EditPimProdCatalog" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="pimProdCatalog"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="Add Category to Catalog">
+                                    <include-form name="AddPimProdCatalogCategory" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                                </screenlet>
+                                <screenlet title="Catalog Categories">
+                                    <include-form name="ListPimProdCatalogCategories" location="component://productinformationmgr/widget/ProductinformationmgrForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of Productinformationmgr Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+
+    <entity entity-name="PimProductType" package-name="com.hotwax.pim.product" title="Product Type">
+        <field name="productTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productTypeId"/>
+    </entity>
+
+    <entity entity-name="PimProductContentType" package-name="com.hotwax.pim.product" title="Product Content Type">
+        <field name="productContentTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productContentTypeId"/>
+    </entity>
+
+    <entity entity-name="PimProductPriceType" package-name="com.hotwax.pim.product" title="Product Price Type">
+        <field name="productPriceTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productPriceTypeId"/>
+    </entity>
+
+    <entity entity-name="PimDimensionType" package-name="com.hotwax.pim.product" title="Dimension Type">
+        <field name="dimensionTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="dimensionTypeId"/>
+    </entity>
+
+    <entity entity-name="PimProductAssocType" package-name="com.hotwax.pim.product" title="Product Association Type">
+        <field name="productAssocTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productAssocTypeId"/>
+    </entity>
+
+    <entity entity-name="PimUom" package-name="com.hotwax.pim.product" title="Unit of Measure">
+        <field name="uomId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="uomId"/>
+    </entity>
+
+    <entity entity-name="PimProduct" package-name="com.hotwax.pim.product" title="Product">
+        <field name="productId" type="id"></field>
+        <field name="productTypeId" type="id"></field>
+        <field name="productName" type="name"></field>
+        <field name="isVirtual" type="indicator"></field>
+        <field name="isVariant" type="indicator"></field>
+        <field name="fromDate" type="date-time"></field>
+        <prim-key field="productId"/>
+        <relation type="one" fk-name="PIM_PROD_TYPE" rel-entity-name="PimProductType">
+            <key-map field-name="productTypeId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductContent" package-name="com.hotwax.pim.product" title="Product Content">
+        <field name="productContentId" type="id"></field>
+        <field name="productId" type="id"></field>
+        <field name="productContentTypeId" type="id"></field>
+        <field name="contentLocation" type="long-varchar"></field>
+        <prim-key field="productContentId"/>
+        <relation type="one" fk-name="PIM_PCONT_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PCONT_TYPE" rel-entity-name="PimProductContentType">
+            <key-map field-name="productContentTypeId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductPrice" package-name="com.hotwax.pim.product" title="Product Price">
+        <field name="productPriceId" type="id"></field>
+        <field name="productId" type="id"></field>
+        <field name="productPriceTypeId" type="id"></field>
+        <field name="currencyUomId" type="id"></field>
+        <field name="price" type="currency-amount"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productPriceId"/>
+        <relation type="one" fk-name="PIM_PPRC_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PPRC_TYPE" rel-entity-name="PimProductPriceType">
+            <key-map field-name="productPriceTypeId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PPRC_UOM" rel-entity-name="PimUom">
+            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductDimension" package-name="com.hotwax.pim.product" title="Product Dimension">
+        <field name="productId" type="id"></field>
+        <field name="dimensionTypeId" type="id"></field>
+        <field name="dimensionValue" type="fixed-point"></field>
+        <field name="uomId" type="id"></field>
+        <prim-key field="productId"/>
+        <prim-key field="dimensionTypeId"/>
+        <relation type="one" fk-name="PIM_PDIM_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PDIM_TYPE" rel-entity-name="PimDimensionType">
+            <key-map field-name="dimensionTypeId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PDIM_UOM" rel-entity-name="PimUom">
+            <key-map field-name="uomId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductAssoc" package-name="com.hotwax.pim.product" title="Product Association">
+        <field name="productId" type="id"></field>
+        <field name="toProductId" type="id"></field>
+        <field name="productAssocTypeId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productId"/>
+        <prim-key field="toProductId"/>
+        <prim-key field="productAssocTypeId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PASS_MAIN" title="Main" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PASS_ASSOC" title="Assoc" rel-entity-name="PimProduct">
+            <key-map field-name="toProductId" rel-field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PASS_TYPE" rel-entity-name="PimProductAssocType">
+            <key-map field-name="productAssocTypeId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimGoodIdentificationType" package-name="com.hotwax.pim.product" title="Good Identification Type">
+        <field name="goodIdentificationTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="goodIdentificationTypeId"/>
+    </entity>
+
+    <entity entity-name="PimGoodIdentification" package-name="com.hotwax.pim.product" title="Good Identification">
+        <field name="goodIdentificationTypeId" type="id"></field>
+        <field name="productId" type="id"></field>
+        <field name="idValue" type="id-long"></field>
+        <prim-key field="goodIdentificationTypeId"/>
+        <prim-key field="productId"/>
+        <relation type="one" fk-name="PIM_GOODID_TYPE" rel-entity-name="PimGoodIdentificationType">
+            <key-map field-name="goodIdentificationTypeId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_GOODID_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductFeatureType" package-name="com.hotwax.pim.feature" title="Product Feature Type">
+        <field name="productFeatureTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productFeatureTypeId"/>
+    </entity>
+
+    <entity entity-name="PimProductFeature" package-name="com.hotwax.pim.feature" title="Product Feature">
+        <field name="productFeatureId" type="id"></field>
+        <field name="productFeatureTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productFeatureId"/>
+        <relation type="one" fk-name="PIM_PFEAT_TYPE" rel-entity-name="PimProductFeatureType">
+            <key-map field-name="productFeatureTypeId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductFeatureAppl" package-name="com.hotwax.pim.feature" title="Product Feature Applicability">
+        <field name="productId" type="id"></field>
+        <field name="productFeatureId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productId"/>
+        <prim-key field="productFeatureId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PFAPP_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PFAPP_FEAT" rel-entity-name="PimProductFeature">
+            <key-map field-name="productFeatureId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductCategoryType" package-name="com.hotwax.pim.category" title="Product Category Type">
+        <field name="productCategoryTypeId" type="id"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productCategoryTypeId"/>
+    </entity>
+
+    <entity entity-name="PimProductCategory" package-name="com.hotwax.pim.category" title="Product Category">
+        <field name="productCategoryId" type="id"></field>
+        <field name="productCategoryTypeId" type="id"></field>
+        <field name="primaryParentCategoryId" type="id"></field>
+        <field name="categoryName" type="name"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productCategoryId"/>
+        <relation type="one" fk-name="PIM_PCAT_TYPE" rel-entity-name="PimProductCategoryType">
+            <key-map field-name="productCategoryTypeId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PCAT_PARENT" title="PrimaryParent" rel-entity-name="PimProductCategory">
+            <key-map field-name="primaryParentCategoryId" rel-field-name="productCategoryId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductCategoryRollup" package-name="com.hotwax.pim.category" title="Product Category Rollup">
+        <field name="productCategoryId" type="id"></field>
+        <field name="parentProductCategoryId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productCategoryId"/>
+        <prim-key field="parentProductCategoryId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PCR_CHILD" title="Current" rel-entity-name="PimProductCategory">
+            <key-map field-name="productCategoryId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PCR_PARENT" title="Parent" rel-entity-name="PimProductCategory">
+            <key-map field-name="parentProductCategoryId" rel-field-name="productCategoryId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductCategoryMember" package-name="com.hotwax.pim.category" title="Product Category Member">
+        <field name="productCategoryId" type="id"></field>
+        <field name="productId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productCategoryId"/>
+        <prim-key field="productId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PCM_PROD" rel-entity-name="PimProduct">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PCM_CAT" rel-entity-name="PimProductCategory">
+            <key-map field-name="productCategoryId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProdCatalog" package-name="com.hotwax.pim.catalog" title="Catalog">
+        <field name="prodCatalogId" type="id"></field>
+        <field name="catalogName" type="name"></field>
+        <prim-key field="prodCatalogId"/>
+    </entity>
+
+    <entity entity-name="PimProdCatalogCategory" package-name="com.hotwax.pim.catalog" title="Catalog Category Association">
+        <field name="prodCatalogId" type="id"></field>
+        <field name="productCategoryId" type="id"></field>
+        <field name="prodCatalogCategoryTypeId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="prodCatalogId"/>
+        <prim-key field="productCategoryId"/>
+        <prim-key field="prodCatalogCategoryTypeId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PCC_CATALOG" rel-entity-name="PimProdCatalog">
+            <key-map field-name="prodCatalogId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PCC_CATEGORY" rel-entity-name="PimProductCategory">
+            <key-map field-name="productCategoryId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductStoreGroup" package-name="com.hotwax.pim.store" title="Product Store Group">
+        <field name="productStoreGroupId" type="id"></field>
+        <field name="productStoreGroupName" type="name"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="productStoreGroupId"/>
+    </entity>
+
+    <entity entity-name="PimProductStore" package-name="com.hotwax.pim.store" title="Product Store">
+        <field name="productStoreId" type="id"></field>
+        <field name="primaryStoreGroupId" type="id"></field>
+        <field name="storeName" type="name"></field>
+        <field name="payToPartyId" type="id"></field>
+        <prim-key field="productStoreId"/>
+        <relation type="one" fk-name="PIM_PSTR_GROUP" title="Primary" rel-entity-name="PimProductStoreGroup">
+            <key-map field-name="primaryStoreGroupId" rel-field-name="productStoreGroupId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="Party">
+            <key-map field-name="payToPartyId" rel-field-name="partyId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="PimProductStoreCatalog" package-name="com.hotwax.pim.store" title="Product Store Catalog Association">
+        <field name="productStoreId" type="id"></field>
+        <field name="prodCatalogId" type="id"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productStoreId"/>
+        <prim-key field="prodCatalogId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PIM_PSC_STORE" rel-entity-name="PimProductStore">
+            <key-map field-name="productStoreId"/>
+        </relation>
+        <relation type="one" fk-name="PIM_PSC_CATALOG" rel-entity-name="PimProdCatalog">
+            <key-map field-name="prodCatalogId"/>
+        </relation>
+    </entity>
+
+</entitymodel>

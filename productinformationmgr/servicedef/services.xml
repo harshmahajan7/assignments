@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://ofbiz.apache.org/dtds/services.xsd">
+    <description>Productinformationmgr Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <!-- Product Services -->
+    <service name="createPimProduct" default-entity-name="PimProduct" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a PimProduct</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updatePimProduct" default-entity-name="PimProduct" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a PimProduct</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePimProduct" default-entity-name="PimProduct" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a PimProduct</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Feature Services -->
+    <service name="createPimProductFeature" default-entity-name="PimProductFeature" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a PimProductFeature</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updatePimProductFeature" default-entity-name="PimProductFeature" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a PimProductFeature</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePimProductFeature" default-entity-name="PimProductFeature" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a PimProductFeature</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Category Services -->
+    <service name="createPimProductCategory" default-entity-name="PimProductCategory" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a PimProductCategory</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updatePimProductCategory" default-entity-name="PimProductCategory" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a PimProductCategory</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePimProductCategory" default-entity-name="PimProductCategory" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a PimProductCategory</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Catalog Services -->
+    <service name="createPimProdCatalog" default-entity-name="PimProdCatalog" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a PimProdCatalog</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updatePimProdCatalog" default-entity-name="PimProdCatalog" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a PimProdCatalog</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePimProdCatalog" default-entity-name="PimProdCatalog" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a PimProdCatalog</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Catalog Category Services -->
+    <service name="createPimProdCatalogCategory" default-entity-name="PimProdCatalogCategory" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a PimProdCatalogCategory</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="deletePimProdCatalogCategory" default-entity-name="PimProdCatalogCategory" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a PimProdCatalogCategory</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+</services>

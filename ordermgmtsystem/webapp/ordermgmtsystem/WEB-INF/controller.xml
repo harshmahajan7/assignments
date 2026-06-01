@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://ofbiz.apache.org/Site-Conf"
+    xsi:schemaLocation="http://ofbiz.apache.org/Site-Conf http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <!-- The controller elements that are common to all OFBiz components
+         can be found in the following xml file. A component can override the
+         elements found in the common-controller.xml file. -->
+    <include location="component://common/webcommon/WEB-INF/common-controller.xml" />
+
+    <description>Ordermgmtsystem Component Site Configuration File</description>
+
+    <!-- Events to run on every request before security (chains exempt) -->
+    <!--
+    <preprocessor>
+    </preprocessor>
+    -->
+    <!-- Events to run on every request after all other processing (chains exempt) -->
+    <!--
+    <postprocessor>
+        <event name="test" type="java" path="org.apache.ofbiz.webapp.event.TestEvent" invoke="test"/>
+    </postprocessor>
+    -->
+
+    <!-- Request Mappings -->
+    <request-map uri="main"><security https="true" auth="true"/><response name="success" type="request" value="FindOmsOrderHeader"/></request-map>
+
+    <!-- Order Header -->
+    <request-map uri="FindOmsOrderHeader">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="EditOmsOrderHeader">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="createOmsOrderHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderHeader"/>
+        <response name="success" type="request-redirect" value="FindOmsOrderHeader"/>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="updateOmsOrderHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateOmsOrderHeader"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderHeader"/>
+        <response name="success" type="request-redirect" value="FindOmsOrderHeader"/>
+    </request-map>
+
+    <!-- Order Part -->
+    <request-map uri="createOmsOrderPart">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderPart"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderPart">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderPart"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Order Item -->
+    <request-map uri="createOmsOrderItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderItem"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderItem"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Order Adjustment -->
+    <request-map uri="createOmsOrderAdjustment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderAdjustment"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderAdjustment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderAdjustment"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Order Term -->
+    <request-map uri="createOmsOrderTerm">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderTerm"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderTerm">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderTerm"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Order Party -->
+    <request-map uri="createOmsOrderParty">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderParty"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderParty">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderParty"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Order Payment -->
+    <request-map uri="createOmsOrderPaymentPref">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsOrderPaymentPref"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsOrderHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsOrderPaymentPref">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsOrderPaymentPref"/>
+        <response name="success" type="request-redirect" value="EditOmsOrderHeader">
+            <redirect-parameter name="orderId"/>
+        </response>
+    </request-map>
+
+    <!-- Return Header -->
+    <request-map uri="FindOmsReturnHeader">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindOmsReturnHeader"/>
+    </request-map>
+    <request-map uri="EditOmsReturnHeader">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditOmsReturnHeader"/>
+    </request-map>
+    <request-map uri="createOmsReturnHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsReturnHeader"/>
+        <response name="success" type="request-redirect" value="EditOmsReturnHeader">
+            <redirect-parameter name="returnId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsReturnHeader"/>
+    </request-map>
+    <request-map uri="updateOmsReturnHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateOmsReturnHeader"/>
+        <response name="success" type="view" value="EditOmsReturnHeader"/>
+        <response name="error" type="view" value="EditOmsReturnHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsReturnHeader">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsReturnHeader"/>
+        <response name="success" type="request-redirect" value="FindOmsReturnHeader"/>
+    </request-map>
+
+    <!-- Return Item -->
+    <request-map uri="createOmsReturnItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsReturnItem"/>
+        <response name="success" type="request-redirect" value="EditOmsReturnHeader">
+            <redirect-parameter name="returnId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsReturnHeader"/>
+    </request-map>
+    <request-map uri="deleteOmsReturnItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsReturnItem"/>
+        <response name="success" type="request-redirect" value="EditOmsReturnHeader">
+            <redirect-parameter name="returnId"/>
+        </response>
+    </request-map>
+
+    <!-- Shipment Header -->
+    <request-map uri="FindOmsShipment">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindOmsShipment"/>
+    </request-map>
+    <request-map uri="EditOmsShipment">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="createOmsShipment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsShipment"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="updateOmsShipment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateOmsShipment"/>
+        <response name="success" type="view" value="EditOmsShipment"/>
+        <response name="error" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="deleteOmsShipment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsShipment"/>
+        <response name="success" type="request-redirect" value="FindOmsShipment"/>
+    </request-map>
+
+    <!-- Shipment Item -->
+    <request-map uri="createOmsShipmentItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsShipmentItem"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="deleteOmsShipmentItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsShipmentItem"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+    </request-map>
+
+    <!-- Shipment Package -->
+    <request-map uri="createOmsShipmentPackage">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsShipmentPackage"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="deleteOmsShipmentPackage">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsShipmentPackage"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+    </request-map>
+
+    <!-- Shipment Route Segment -->
+    <request-map uri="createOmsShipmentRouteSegment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOmsShipmentRouteSegment"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+        <response name="error" type="view" value="EditOmsShipment"/>
+    </request-map>
+    <request-map uri="deleteOmsShipmentRouteSegment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteOmsShipmentRouteSegment"/>
+        <response name="success" type="request-redirect" value="EditOmsShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
+    </request-map>
+
+    <!-- View Mappings -->
+    <view-map name="main"                 type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#main"/>
+    <view-map name="FindOmsOrderHeader"   type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#FindOmsOrderHeader"/>
+    <view-map name="EditOmsOrderHeader"   type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#EditOmsOrderHeader"/>
+    
+    <view-map name="FindOmsReturnHeader"  type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#FindOmsReturnHeader"/>
+    <view-map name="EditOmsReturnHeader"  type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#EditOmsReturnHeader"/>
+
+    <view-map name="FindOmsShipment"      type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#FindOmsShipment"/>
+    <view-map name="EditOmsShipment"      type="screen" page="component://ordermgmtsystem/widget/OrdermgmtsystemScreens.xml#EditOmsShipment"/>
+
+</site-conf>
