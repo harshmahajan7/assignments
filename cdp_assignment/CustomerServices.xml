@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="CustomerProfile" authenticate="true">
+        <in-parameters>
+            <parameter name="firstName" required="true" type="String"/>
+            <parameter name="lastName" required="true" type="String"/>
+            <parameter name="emailAddress" type="String"><text-email/></parameter>
+            <parameter name="contactNumber" type="String"/>
+            <parameter name="acceptsMarketing" type="Boolean" default-value="false"/>
+            <parameter name="externalId" type="String"/>
+            <parameter name="externalIdType" type="String" default-value="SHOPIFY_CUST_ID"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId" required="true"/>
+        </out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId: 'PtPerson']" out-map="partyOut"/>
+            <set field="partyId" from="partyOut.partyId"/>
+
+            <service-call name="create#mantle.party.Person" in-map="[partyId: partyId, firstName: firstName, lastName: lastName]"/>
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId: partyId, roleTypeId: 'Customer']"/>
+
+            <if condition="externalId">
+                <service-call name="create#mantle.party.PartyIdentification" in-map="[partyId: partyId, partyIdTypeEnumId: externalIdType, idValue: externalId]"/>
+            </if>
+
+            <if condition="emailAddress">
+                <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtEmailAddress', infoString: emailAddress]" out-map="emailOut"/>
+                <set field="optInInd" from="acceptsMarketing ? 'Y' : 'N'"/>
+                <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: emailOut.contactMechId, contactMechPurposeId: 'EmailPrimary', fromDate: ec.user.nowTimestamp, extension: optInInd]"/>
+            </if>
+
+            <if condition="contactNumber">
+                <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtTelecomNumber']" out-map="phoneOut"/>
+                <service-call name="create#mantle.party.contact.TelecomNumber" in-map="[contactMechId: phoneOut.contactMechId, contactNumber: contactNumber]"/>
+                <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: phoneOut.contactMechId, contactMechPurposeId: 'PhonePrimary', fromDate: ec.user.nowTimestamp]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CustomerProfile" authenticate="true">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="customerProfile" type="Map"/>
+        </out-parameters>
+        <actions>
+            <set field="customerProfile" from="[:]"/>
+            <entity-find-one entity-name="mantle.party.Person" value-field="person">
+                <field-map field-name="partyId" from="partyId"/>
+            </entity-find-one>
+            
+            <if condition="!person"><return error="true" message="Customer record not found for partyId [${partyId}]."/></if>
+            
+            <script>
+                customerProfile.putAll(person.getMap())
+                customerProfile.identities = []
+                customerProfile.contactMethods = [emails: [], phones: [], addresses: []]
+            </script>
+
+            <entity-find entity-name="mantle.party.PartyIdentification" list="identities">
+                <econdition field-name="partyId" from="partyId"/>
+            </entity-find>
+            <iterate list="identities" entry="identity">
+                <script>customerProfile.identities.add([type: identity.partyIdTypeEnumId, value: identity.idValue])</script>
+            </iterate>
+
+            <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="contactMechs">
+                <econdition field-name="partyId" from="partyId"/>
+                <date-filter/>
+            </entity-find>
+
+            <iterate list="contactMechs" entry="cm">
+                <if condition="cm.contactMechTypeEnumId == 'CmtEmailAddress'">
+                    <script>customerProfile.contactMethods.emails.add([id: cm.contactMechId, email: cm.infoString, purpose: cm.contactMechPurposeId])</script>
+                <else-if condition="cm.contactMechTypeEnumId == 'CmtTelecomNumber'">
+                    <script>customerProfile.contactMethods.phones.add([id: cm.contactMechId, number: cm.contactNumber, purpose: cm.contactMechPurposeId])</script>
+                </else-if>
+                <else-if condition="cm.contactMechTypeEnumId == 'CmtPostalAddress'">
+                    <script>customerProfile.contactMethods.addresses.add([id: cm.contactMechId, address1: cm.address1, city: cm.city, zip: cm.postalCode, purpose: cm.contactMechPurposeId])</script>
+                </else-if>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="CustomerProfile" authenticate="true">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="firstName"/>
+            <parameter name="lastName"/>
+            <parameter name="emailAddress"/>
+        </in-parameters>
+        <actions>
+            <if condition="firstName || lastName">
+                <service-call name="update#mantle.party.Person" in-map="context"/>
+            </if>
+
+            <if condition="emailAddress">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="oldEmails">
+                    <econdition field-name="partyId" from="partyId"/>
+                    <econdition field-name="contactMechPurposeId" value="EmailPrimary"/>
+                    <date-filter/>
+                </entity-find>
+                
+                <iterate list="oldEmails" entry="oldEmail">
+                    <service-call name="update#mantle.party.contact.PartyContactMech" in-map="[partyId: oldEmail.partyId, contactMechId: oldEmail.contactMechId, contactMechPurposeId: oldEmail.contactMechPurposeId, fromDate: oldEmail.fromDate, thruDate: ec.user.nowTimestamp]"/>
+                </iterate>
+                
+                <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtEmailAddress', infoString: emailAddress]" out-map="newEmail"/>
+                <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: newEmail.contactMechId, contactMechPurposeId: 'EmailPrimary', fromDate: ec.user.nowTimestamp]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="CustomerProfile" authenticate="true">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" list="activeMechs">
+                <econdition field-name="partyId" from="partyId"/>
+                <date-filter/>
+            </entity-find>
+
+            <iterate list="activeMechs" entry="pcm">
+                <set field="pcm.thruDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="pcm"/>
+            </iterate>
+            
+            <service-call name="update#mantle.party.Party" in-map="[partyId: partyId, statusId: 'PartyDisabled']" ignore-error="true"/>
+        </actions>
+    </service>
+
+    <service verb="sync" noun="ShopifyCustomer" authenticate="true">
+        <in-parameters>
+            <parameter name="shopifyCustomer" type="Map" required="true"/>
+        </in-parameters>
+        <actions>
+            <if condition="!shopifyCustomer || !shopifyCustomer.id">
+                <return error="true" message="Payload validation failed: Missing required field 'id'."/>
+            </if>
+            <set field="shopifyIdStr" from="shopifyCustomer.id.toString()"/>
+
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="existingIdentity">
+                <field-map field-name="partyIdTypeEnumId" value="SHOPIFY_CUST_ID"/>
+                <field-map field-name="idValue" from="shopifyIdStr"/>
+            </entity-find-one>
+
+            <if condition="existingIdentity">
+                <set field="partyId" from="existingIdentity.partyId"/>
+                <service-call name="update#mantle.party.Person" in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
+            <else>
+                <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId: 'PtPerson']" out-map="partyOut"/>
+                <set field="partyId" from="partyOut.partyId"/>
+                
+                <service-call name="create#mantle.party.Person" in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
+                
+                <service-call name="create#mantle.party.PartyIdentification" in-map="[partyId: partyId, partyIdTypeEnumId: 'SHOPIFY_CUST_ID', idValue: shopifyIdStr]"/>
+                <service-call name="create#mantle.party.PartyRole" in-map="[partyId: partyId, roleTypeId: 'Customer']"/>
+            </else>
+            </if>
+
+            <if condition="shopifyCustomer.email">
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingEmails">
+                    <econdition field-name="partyId" from="partyId"/>
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
+                    <econdition field-name="infoString" from="shopifyCustomer.email"/>
+                    <date-filter/>
+                </entity-find>
+
+                <if condition="!existingEmails">
+                    <set field="verifiedInd" from="shopifyCustomer.verified_email ? 'Y' : 'N'"/>
+                    <set field="optInInd" from="shopifyCustomer.accepts_marketing ? 'Y' : 'N'"/>
+                    
+                    <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtEmailAddress', infoString: shopifyCustomer.email]" out-map="emailOut"/>
+                    <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: emailOut.contactMechId, contactMechPurposeId: 'EmailPrimary', fromDate: ec.user.nowTimestamp, extension: optInInd]"/> 
+                </if>
+            </if>
+
+            <if condition="shopifyCustomer.phone">
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingPhones">
+                    <econdition field-name="partyId" from="partyId"/>
+                    <econdition field-name="contactMechTypeEnumId" value="CmtTelecomNumber"/>
+                    <econdition field-name="contactNumber" from="shopifyCustomer.phone"/>
+                    <date-filter/>
+                </entity-find>
+
+                <if condition="!existingPhones">
+                    <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtTelecomNumber']" out-map="phoneOut"/>
+                    <service-call name="create#mantle.party.contact.TelecomNumber" in-map="[contactMechId: phoneOut.contactMechId, contactNumber: shopifyCustomer.phone]"/>
+                    <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: phoneOut.contactMechId, contactMechPurposeId: 'PhonePrimary', fromDate: ec.user.nowTimestamp]"/>
+                </if>
+            </if>
+
+            <if condition="shopifyCustomer.addresses &amp;&amp; shopifyCustomer.addresses.size() > 0">
+                <iterate list="shopifyCustomer.addresses" entry="shopifyAddr">
+                    <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingAddrs">
+                        <econdition field-name="partyId" from="partyId"/>
+                        <econdition field-name="contactMechTypeEnumId" value="CmtPostalAddress"/>
+                        <econdition field-name="address1" from="shopifyAddr.address1"/>
+                        <econdition field-name="postalCode" from="shopifyAddr.zip"/>
+                        <date-filter/>
+                    </entity-find>
+
+                    <if condition="!existingAddrs">
+                        <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtPostalAddress']" out-map="addrOut"/>
+                        <service-call name="create#mantle.party.contact.PostalAddress" in-map="[contactMechId: addrOut.contactMechId, address1: shopifyAddr.address1, address2: shopifyAddr.address2, city: shopifyAddr.city, provinceGeoId: shopifyAddr.province, postalCode: shopifyAddr.zip, countryGeoId: shopifyAddr.country]"/>
+                        
+                        <set field="purposeId" from="shopifyAddr.default ? 'PostalShippingDest' : 'PostalGeneral'"/>
+                        <service-call name="create#mantle.party.contact.PartyContactMech" in-map="[partyId: partyId, contactMechId: addrOut.contactMechId, contactMechPurposeId: purposeId, fromDate: ec.user.nowTimestamp]"/>
+                    </if>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+</services>
