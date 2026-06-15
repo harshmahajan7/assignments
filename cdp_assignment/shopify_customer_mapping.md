@@ -35,81 +35,148 @@ Shopify returns an array of `addresses`. Each object in the array is mapped to a
 
 ---
 
-## 2. Integration Pseudo-code (Upsert Logic)
+## 2. Integration Implementation (Moqui XML Services)
 
-This pseudo-code demonstrates fetching data from Shopify, transforming it, and upserting it into the UDM database using Moqui XML Actions.
+The following XML snippet represents the integration layer constructed as a robust Moqui Service. It handles data translation, state checking, and transactional upserts for Shopify Customer payloads into the Universal Data Model.
 
 ```xml
-<service verb="sync" noun="ShopifyCustomer">
-    <description>Integrates a Shopify Customer Payload into the UDM CDP.</description>
-    <in-parameters>
-        <parameter name="shopifyCustomer" type="Map" required="true"/>
-    </in-parameters>
-    <actions>
-        <!-- 1. Data Validation -->
-        <if condition="!shopifyCustomer || !shopifyCustomer.id">
-            <return error="true" message="Invalid Shopify payload: Missing ID"/>
-        </if>
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
-        <set field="shopifyId" from="shopifyCustomer.id.toString()"/>
+    <!-- ========================================== -->
+    <!-- Service: Sync Shopify Customer Payload     -->
+    <!-- ========================================== -->
+    <service verb="sync" noun="ShopifyCustomer" authenticate="true">
+        <description>
+            Idempotent synchronization service for Shopify Customer Webhooks. 
+            Performs UPSERT logic mapping Shopify JSON to UDM Party schema.
+        </description>
+        <in-parameters>
+            <parameter name="shopifyCustomer" type="Map" required="true"/>
+        </in-parameters>
+        <actions>
+            <!-- 1. Payload Validation -->
+            <if condition="!shopifyCustomer || !shopifyCustomer.id">
+                <return error="true" message="Payload validation failed: Missing required field 'id'."/>
+            </if>
+            <set field="shopifyIdStr" from="shopifyCustomer.id.toString()"/>
 
-        <!-- 2. Check for existing customer using PartyIdentification (Upsert Logic) -->
-        <entity-find-one entity-name="PartyIdentification" value-field="existingIdentity">
-            <field-map field-name="partyIdTypeEnumId" value="SHOPIFY_CUST_ID"/>
-            <field-map field-name="idValue" from="shopifyId"/>
-        </entity-find-one>
+            <!-- 2. Idempotency Check (Locate Existing Customer) -->
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="existingIdentity">
+                <field-map field-name="partyIdTypeEnumId" value="SHOPIFY_CUST_ID"/>
+                <field-map field-name="idValue" from="shopifyIdStr"/>
+            </entity-find-one>
 
-        <if condition="existingIdentity">
-            <!-- Customer exists -> UPDATE -->
-            <set field="partyId" from="existingIdentity.partyId"/>
-            <service-call name="update#Person" in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
-            
+            <if condition="existingIdentity">
+                <!-- ============================ -->
+                <!-- UPDATE EXISTING PROFILE      -->
+                <!-- ============================ -->
+                <set field="partyId" from="existingIdentity.partyId"/>
+                <log level="info" message="Updating existing customer [${partyId}] from Shopify ID: ${shopifyIdStr}"/>
+                
+                <service-call name="update#mantle.party.Person" 
+                              in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
             <else>
-                <!-- Customer does not exist -> INSERT -->
-                <service-call name="create#Party" in-map="[partyTypeEnumId: 'PERSON']" out-map="partyOut"/>
+                <!-- ============================ -->
+                <!-- PROVISION NEW PROFILE        -->
+                <!-- ============================ -->
+                <log level="info" message="Provisioning new customer from Shopify ID: ${shopifyIdStr}"/>
+                
+                <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId: 'PtPerson']" out-map="partyOut"/>
                 <set field="partyId" from="partyOut.partyId"/>
                 
-                <service-call name="create#Person" in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
+                <service-call name="create#mantle.party.Person" 
+                              in-map="[partyId: partyId, firstName: shopifyCustomer.first_name, lastName: shopifyCustomer.last_name]"/>
                 
-                <!-- Create Shopify ID linkage -->
-                <service-call name="create#PartyIdentification" in-map="[partyId: partyId, partyIdTypeEnumId: 'SHOPIFY_CUST_ID', idValue: shopifyId]"/>
+                <!-- Bind Shopify Identity -->
+                <service-call name="create#mantle.party.PartyIdentification" 
+                              in-map="[partyId: partyId, partyIdTypeEnumId: 'SHOPIFY_CUST_ID', idValue: shopifyIdStr]"/>
+                              
+                <!-- Assign Customer Role -->
+                <service-call name="create#mantle.party.PartyRole" in-map="[partyId: partyId, roleTypeId: 'Customer']"/>
             </else>
-        </if>
+            </if>
 
-        <!-- Handle Contact Details -->
-        
-        <!-- Email -->
-        <if condition="shopifyCustomer.email">
-            <!-- Assume logic to expire old emails exists here -->
-            <service-call name="create#ContactMech" in-map="[contactMechTypeEnumId: 'EMAIL_ADDRESS', infoString: shopifyCustomer.email]" out-map="emailOut"/>
-            <service-call name="create#PartyContactMech" 
-                in-map="[partyId: partyId, contactMechId: emailOut.contactMechId, contactMechPurposeEnumId: 'PRIMARY_EMAIL', fromDate: ec.user.nowTimestamp, verifiedInd: shopifyCustomer.verified_email ? 'Y' : 'N', optInInd: shopifyCustomer.accepts_marketing ? 'Y' : 'N']"/>
-        </if>
+            <!-- ============================ -->
+            <!-- SYNCHRONIZE CONTACT INFO     -->
+            <!-- ============================ -->
 
-        <!-- Phone -->
-        <if condition="shopifyCustomer.phone">
-            <service-call name="create#ContactMech" in-map="[contactMechTypeEnumId: 'TELECOM_NUMBER']" out-map="phoneOut"/>
-            <service-call name="create#TelecomNumber" in-map="[contactMechId: phoneOut.contactMechId, contactNumber: shopifyCustomer.phone]"/>
-            <service-call name="create#PartyContactMech" 
-                in-map="[partyId: partyId, contactMechId: phoneOut.contactMechId, contactMechPurposeEnumId: 'PRIMARY_PHONE', fromDate: ec.user.nowTimestamp]"/>
-        </if>
+            <!-- Sync Email -->
+            <if condition="shopifyCustomer.email">
+                <!-- Check if this exact email is already linked and active -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingEmails">
+                    <econdition field-name="partyId" from="partyId"/>
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
+                    <econdition field-name="infoString" from="shopifyCustomer.email"/>
+                    <date-filter/>
+                </entity-find>
 
-        <!-- Addresses Array -->
-        <if condition="shopifyCustomer.addresses">
-            <iterate list="shopifyCustomer.addresses" entry="shopifyAddr">
-                <service-call name="create#ContactMech" in-map="[contactMechTypeEnumId: 'POSTAL_ADDRESS']" out-map="addrOut"/>
-                <service-call name="create#PostalAddress" 
-                    in-map="[contactMechId: addrOut.contactMechId, address1: shopifyAddr.address1, address2: shopifyAddr.address2, city: shopifyAddr.city, provinceGeoId: shopifyAddr.province, postalCode: shopifyAddr.zip, countryGeoId: shopifyAddr.country]"/>
-                
-                <!-- Map default attribute to Purpose -->
-                <set field="purpose" from="shopifyAddr.default ? 'SHIPPING_LOCATION' : 'GENERAL_LOCATION'"/>
-                
-                <service-call name="create#PartyContactMech" 
-                    in-map="[partyId: partyId, contactMechId: addrOut.contactMechId, contactMechPurposeEnumId: purpose, fromDate: ec.user.nowTimestamp]"/>
-            </iterate>
-        </if>
-        
-        <log message="Successfully synced Shopify customer: ${shopifyId}"/>
-    </actions>
-</service>
+                <if condition="!existingEmails">
+                    <!-- Translate Shopify booleans to UDM Indicators -->
+                    <set field="verifiedInd" from="shopifyCustomer.verified_email ? 'Y' : 'N'"/>
+                    <set field="optInInd" from="shopifyCustomer.accepts_marketing ? 'Y' : 'N'"/>
+                    
+                    <service-call name="create#mantle.party.contact.ContactMech" 
+                                  in-map="[contactMechTypeEnumId: 'CmtEmailAddress', infoString: shopifyCustomer.email]" out-map="emailOut"/>
+                                  
+                    <service-call name="create#mantle.party.contact.PartyContactMech" 
+                                  in-map="[partyId: partyId, contactMechId: emailOut.contactMechId, 
+                                           contactMechPurposeId: 'EmailPrimary', fromDate: ec.user.nowTimestamp, 
+                                           extension: optInInd]"/> <!-- Utilizing extension or custom field for opt-in based on schema -->
+                </if>
+            </if>
+
+            <!-- Sync Phone -->
+            <if condition="shopifyCustomer.phone">
+                <!-- Check if exact phone is linked -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingPhones">
+                    <econdition field-name="partyId" from="partyId"/>
+                    <econdition field-name="contactMechTypeEnumId" value="CmtTelecomNumber"/>
+                    <econdition field-name="contactNumber" from="shopifyCustomer.phone"/>
+                    <date-filter/>
+                </entity-find>
+
+                <if condition="!existingPhones">
+                    <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtTelecomNumber']" out-map="phoneOut"/>
+                    <service-call name="create#mantle.party.contact.TelecomNumber" in-map="[contactMechId: phoneOut.contactMechId, contactNumber: shopifyCustomer.phone]"/>
+                    <service-call name="create#mantle.party.contact.PartyContactMech" 
+                                  in-map="[partyId: partyId, contactMechId: phoneOut.contactMechId, 
+                                           contactMechPurposeId: 'PhonePrimary', fromDate: ec.user.nowTimestamp]"/>
+                </if>
+            </if>
+
+            <!-- Sync Address Array -->
+            <if condition="shopifyCustomer.addresses &amp;&amp; shopifyCustomer.addresses.size() > 0">
+                <iterate list="shopifyCustomer.addresses" entry="shopifyAddr">
+                    <!-- Basic uniqueness check by address1 and zip -->
+                    <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingAddrs">
+                        <econdition field-name="partyId" from="partyId"/>
+                        <econdition field-name="contactMechTypeEnumId" value="CmtPostalAddress"/>
+                        <econdition field-name="address1" from="shopifyAddr.address1"/>
+                        <econdition field-name="postalCode" from="shopifyAddr.zip"/>
+                        <date-filter/>
+                    </entity-find>
+
+                    <if condition="!existingAddrs">
+                        <service-call name="create#mantle.party.contact.ContactMech" in-map="[contactMechTypeEnumId: 'CmtPostalAddress']" out-map="addrOut"/>
+                        <service-call name="create#mantle.party.contact.PostalAddress" 
+                            in-map="[contactMechId: addrOut.contactMechId, address1: shopifyAddr.address1, address2: shopifyAddr.address2, 
+                                     city: shopifyAddr.city, provinceGeoId: shopifyAddr.province, postalCode: shopifyAddr.zip, 
+                                     countryGeoId: shopifyAddr.country]"/>
+                        
+                        <!-- Map default attribute to Purpose -->
+                        <set field="purposeId" from="shopifyAddr.default ? 'PostalShippingDest' : 'PostalGeneral'"/>
+                        
+                        <service-call name="create#mantle.party.contact.PartyContactMech" 
+                                      in-map="[partyId: partyId, contactMechId: addrOut.contactMechId, 
+                                               contactMechPurposeId: purposeId, fromDate: ec.user.nowTimestamp]"/>
+                    </if>
+                </iterate>
+            </if>
+            
+            <log level="info" message="Synchronization complete for Shopify customer: ${shopifyIdStr}"/>
+        </actions>
+    </service>
+
+</services>
 ```
