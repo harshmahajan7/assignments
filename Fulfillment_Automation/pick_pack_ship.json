@@ -1,0 +1,265 @@
+{
+  "info": {
+    "_postman_id": "5e903d8f-feb6-44f3-aa79-e0e5762d7b94",
+    "name": "PICK_PACK_SHIP",
+    "description": "Automates the complete OMS fulfillment lifecycle: Auth → Pick (createOrderFulfillmentWave) → Pack → Ship.\n\nAll requests use Bearer token auth. Run in order:\n1. auth — gets token, save it to {{auth_secret_0s0e}}\n2. pick — creates fulfillment wave for an order item\n3. pack — packs the resulting shipment\n4. ship — marks shipment as shipped\n\nEnvironment: nextgen-maarg.hotwax.io (Maarg REST API)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Token received and saved', function () {",
+              "    var json = pm.response.json();",
+              "    var token = json.token || json.TOKEN;",
+              "    pm.expect(token).to.be.a('string').and.not.empty;",
+              "    pm.collectionVariables.set('auth_secret_0s0e', token);",
+              "    console.log('✅ Token saved:', token.substring(0, 20) + '...');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"USERNAME\": \"{{username}}\",\n  \"PASSWORD\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://nextgen-oms.hotwax.io/api/login",
+          "protocol": "https",
+          "host": ["nextgen-oms", "hotwax", "io"],
+          "path": ["api", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "pick",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Picklist/Wave created', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json._ERROR_MESSAGE_).to.be.undefined;",
+              "    var shipmentId = json.shipmentId",
+              "        || (json.shipments && json.shipments[0] && json.shipments[0].shipmentId);",
+              "    if (shipmentId) {",
+              "        pm.collectionVariables.set('shipment_id', shipmentId);",
+              "        console.log('✅ shipment_id:', shipmentId);",
+              "    }",
+              "    console.log('Pick response:', JSON.stringify(json).substring(0, 300));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"packageName\": \"A\",\n    \"facilityId\": \"MAPLEWOOD\",\n    \"shipmentMethodTypeId\": \"STANDARD\",\n    \"statusId\": \"PICKLIST_ASSIGNED\",\n    \"pickers\": [\n        {\n            \"partyId\": \"10003\",\n            \"roleTypeId\": \"WAREHOUSE_PICKER\"\n        }\n    ],\n    \"orderItems\": [\n        {\n            \"orderId\": \"M102719\",\n            \"orderItemSeqId\": \"02\",\n            \"shipGroupSeqId\": \"00006\",\n            \"productId\": \"M103006\",\n            \"quantity\": 1\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://nextgen-maarg.hotwax.io/rest/s1/poorti/createOrderFulfillmentWave",
+          "protocol": "https",
+          "host": ["nextgen-maarg", "hotwax", "io"],
+          "path": ["rest", "s1", "poorti", "createOrderFulfillmentWave"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "pack",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Shipment packed successfully', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json._ERROR_MESSAGE_).to.be.undefined;",
+              "    console.log('✅ Pack response:', JSON.stringify(json).substring(0, 200));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"shipmentId\": \"M100456\",\n    \"orderId\": \"M102719\",\n    \"facilityId\": \"MAPLEWOOD\",\n    \"rejectedOrderItems\": [],\n    \"shipmentPackageContents\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://nextgen-maarg.hotwax.io/rest/s1/poorti/shipments/M100456/pack",
+          "protocol": "https",
+          "host": ["nextgen-maarg", "hotwax", "io"],
+          "path": ["rest", "s1", "poorti", "shipments", "M100456", "pack"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ship",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Shipment shipped — no errors', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json._ERROR_MESSAGE_).to.be.undefined;",
+              "    pm.expect(json.errorMessage).to.be.undefined;",
+              "    console.log('✅ Ship response:', JSON.stringify(json).substring(0, 200));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"shipmentId\": \"M100456\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://nextgen-maarg.hotwax.io/rest/s1/poorti/shipments/M100456/ship",
+          "protocol": "https",
+          "host": ["nextgen-maarg", "hotwax", "io"],
+          "path": ["rest", "s1", "poorti", "shipments", "M100456", "ship"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_secret_0s0e",
+      "value": "",
+      "description": "Bearer token — auto-set by the auth request test script",
+      "secret": true
+    },
+    {
+      "key": "username",
+      "value": "",
+      "description": "OMS login username — set in environment, do NOT hardcode"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "description": "OMS login password — set in environment, do NOT hardcode",
+      "secret": true
+    },
+    {
+      "key": "shipment_id",
+      "value": "",
+      "description": "Auto-set by pick request test script"
+    }
+  ]
+}
