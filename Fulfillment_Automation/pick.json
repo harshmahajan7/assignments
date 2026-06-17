@@ -1,0 +1,285 @@
+{
+  "info": {
+    "_postman_id": "5e903d8f-feb6-44f3-aa79-e0e5762d7b94",
+    "name": "PICK_PACK",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30768967"
+  },
+  "item": [
+    {
+      "name": "pick",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response =",
+              "pm.response.json();",
+              "",
+              "pm.environment.set(",
+              "    \"picklistId\",",
+              "    response.picklistId",
+              ");",
+              "",
+              "pm.environment.set(",
+              "    \"shipmentId\",",
+              "    response.shipmentIds[0]",
+              ");",
+              "",
+              "console.log(",
+              "    \"Shipment Created:\",",
+              "    response.shipmentIds[0]",
+              ");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"packageName\": \"A\",\n    \"facilityId\": \"{{facilityId}}\",\n    \"shipmentMethodTypeId\": \"STANDARD\",\n    \"statusId\": \"PICKLIST_ASSIGNED\",\n    \"pickers\": [\n        {\n            \"partyId\": \"{{pickerPartyId}}\",\n            \"roleTypeId\": \"WAREHOUSE_PICKER\"\n        }\n    ],\n    \"orderItems\": [\n        {\n            \"orderId\": \"{{orderId}}\",\n            \"orderItemSeqId\": \"{{orderItemSeqId}}\",\n            \"shipGroupSeqId\": \"{{shipGroupSeqId}}\",\n            \"productId\": \"{{productId}}\",\n            \"quantity\": {{quantity}}\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rest/s1/poorti/createOrderFulfillmentWave",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rest",
+            "s1",
+            "poorti",
+            "createOrderFulfillmentWave"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "pack",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response =",
+              "pm.response.json();",
+              "",
+              "pm.environment.set(",
+              "    \"packedShipmentId\",",
+              "    response.packedShipmentId",
+              ");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"shipmentId\": \"{{shipmentId}}\",\n    \"orderId\": \"{{orderId}}\",\n    \"facilityId\": \"{{facilityId}}\",\n    \"rejectedOrderItems\": [],\n    \"shipmentPackageContents\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rest/s1/poorti/shipments/{{shipmentId}}/pack",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rest",
+            "s1",
+            "poorti",
+            "shipments",
+            "{{shipmentId}}",
+            "pack"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ship",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.environment.get(\"shipmentId\")) {",
+              "    throw new Error(\"shipmentId not found\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Ship Successful\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "console.log(\"Ship Response:\", pm.response.text());"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_secret_0s0e}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"shipmentId\": \"{{shipmentId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rest/s1/poorti/shipments/{{shipmentId}}/ship",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rest",
+            "s1",
+            "poorti",
+            "shipments",
+            "{{shipmentId}}",
+            "ship"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "auth",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"USERNAME\": \"{{username}}\",\n  \"PASSWORD\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://nextgen-oms.hotwax.io/api/login",
+          "protocol": "https",
+          "host": [
+            "nextgen-oms",
+            "hotwax",
+            "io"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_secret_0s0e",
+      "secret": true
+    }
+  ]
+}
