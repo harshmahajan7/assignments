@@ -1,0 +1,132 @@
+{
+  "id": "4a2a0448-8fd4-4226-ac26-b9cca3a4ddb8",
+  "name": "OMS Fulfillment - Dev",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://nextgen-oms.hotwax.io",
+      "type": "default",
+      "enabled": true,
+      "description": "OMS instance base URL (no trailing slash)"
+    },
+    {
+      "key": "username",
+      "value": "hotwax.user",
+      "type": "default",
+      "enabled": true,
+      "description": "OMS login username"
+    },
+    {
+      "key": "password",
+      "value": "hotwax@123",
+      "type": "secret",
+      "enabled": true,
+      "description": "OMS login password"
+    },
+    {
+      "key": "product_store_id",
+      "value": "STORE",
+      "type": "default",
+      "enabled": true,
+      "description": "Product Store ID (e.g. STORE)"
+    },
+    {
+      "key": "facility_id",
+      "value": "DEMO_FACILITY",
+      "type": "default",
+      "enabled": true,
+      "description": "Fulfillment facility ID. Options: DEMO_FACILITY, Savannah, HARSH_RETAIL_STORE, MAPLEWOOD, QUEENS_STORE, SV_STORE, Austin, Scottsdale, PAPPY_AND_COMPANY"
+    },
+    {
+      "key": "picker_party_id",
+      "value": "_NA_",
+      "type": "default",
+      "enabled": true,
+      "description": "partyId of the warehouse picker assigned to the picklist. Use _NA_ for default/unassigned."
+    },
+    {
+      "key": "carrier_party_id",
+      "value": "_NA_",
+      "type": "default",
+      "enabled": true,
+      "description": "Carrier party ID (e.g. _NA_ for unknown/none)"
+    },
+    {
+      "key": "shipment_method_type_id",
+      "value": "STANDARD",
+      "type": "default",
+      "enabled": true,
+      "description": "Shipment method type ID (e.g. STANDARD, NEXT_DAY)"
+    },
+    {
+      "key": "shipment_box_type_id",
+      "value": "YOURPACKNG",
+      "type": "default",
+      "enabled": true,
+      "description": "Box type ID for packing (e.g. YOURPACKNG)"
+    },
+    {
+      "key": "tracking_code",
+      "value": "TRACK123456",
+      "type": "default",
+      "enabled": true,
+      "description": "Carrier tracking number to attach to the packed shipment"
+    },
+    {
+      "key": "api_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true,
+      "description": "AUTO-SET by step 0.1 Login. Do not edit manually."
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.1 Find Open Order."
+    },
+    {
+      "key": "order_item_seq_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.1 Find Open Order."
+    },
+    {
+      "key": "ship_group_seq_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.1 Find Open Order."
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.1 Find Open Order."
+    },
+    {
+      "key": "picklist_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.2 Create Picklist."
+    },
+    {
+      "key": "shipment_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "AUTO-SET by step 1.2 Create Picklist. Used in all subsequent Pack/Ship steps."
+    },
+    {
+      "key": "shipment_package_seq_id",
+      "value": "00001",
+      "type": "default",
+      "enabled": true,
+      "description": "Default shipment package sequence ID (usually 00001)."
+    }
+  ]
+}

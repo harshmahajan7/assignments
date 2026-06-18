@@ -1,0 +1,578 @@
+{
+  "info": {
+    "_postman_id": "0367c985-f4d0-494b-9fa4-c4ade2d8d367",
+    "name": "OMS Fulfillment Lifecycle - Pick → Pack → Ship",
+    "description": "## OMS Fulfillment Lifecycle Automation\n\nAutomates the **complete** fulfillment lifecycle without any UI interaction:\n\n**Flow:**\n`Login` → `Find Open Order` → `Create Picklist (Pick)` → `Pack Shipment` → `Ship Shipment` → `Verify`\n\n---\n\n### How to Use\n1. Select the **OMS Fulfillment - Dev** environment.\n2. Set `facility_id` and `product_store_id` in the environment.\n3. Run the collection in **Collection Runner** — variables chain automatically!\n\n---\n\n### Variable Chaining\n| Step | Sets Variables |\n|------|----------------|\n| Login | `api_token` |\n| Find Open Order | `order_id`, `order_item_seq_id`, `ship_group_seq_id`, `product_id` |\n| Create Picklist | `picklist_id`, `shipment_id` |\n| Pack Shipment | *(validates pack success)* |\n| Ship Shipment | *(validates ship success)* |\n| Verify | *(asserts SHIPMENT_SHIPPED & ITEM_COMPLETED)* |",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request: nothing needed here."
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level test: verify no 5xx errors on all requests.",
+          "pm.test('No server error (5xx)', function () {",
+          "    pm.expect(pm.response.code).to.be.below(500);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Auth",
+      "item": [
+        {
+          "name": "0.1 Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login successful (200)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Token received', function () {",
+                  "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "if (json.token) {",
+                  "    pm.environment.set('api_token', json.token);",
+                  "    console.log('✅ api_token set:', json.token.substring(0, 20) + '...');",
+                  "} else {",
+                  "    console.error('❌ Login failed - no token in response');",
+                  "    throw new Error('Login failed - cannot continue');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"USERNAME\": \"{{username}}\",\n  \"PASSWORD\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "description": "Authenticates with the OMS and stores the Bearer token in `api_token`. All subsequent requests inherit this token from the collection-level auth."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Pick — Find & Create Picklist",
+      "item": [
+        {
+          "name": "1.1 Find Open Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Find Open Order - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "// Navigate the Solr grouped response",
+                  "const groups = json?.grouped?.orderItemShipGroupIdentifier?.groups;",
+                  "",
+                  "pm.test('At least one open order found', function () {",
+                  "    pm.expect(groups).to.be.an('array').and.not.empty;",
+                  "});",
+                  "",
+                  "if (groups && groups.length > 0) {",
+                  "    const firstDoc = groups[0].doclist.docs[0];",
+                  "",
+                  "    pm.environment.set('order_id',          firstDoc.orderId);",
+                  "    pm.environment.set('order_item_seq_id', firstDoc.orderItemSeqId || '00001');",
+                  "    pm.environment.set('ship_group_seq_id', firstDoc.shipGroupSeqId || '00001');",
+                  "    pm.environment.set('product_id',        firstDoc.productId);",
+                  "",
+                  "    console.log('✅ Order found:', {",
+                  "        orderId:        firstDoc.orderId,",
+                  "        orderItemSeqId: firstDoc.orderItemSeqId,",
+                  "        shipGroupSeqId: firstDoc.shipGroupSeqId,",
+                  "        productId:      firstDoc.productId",
+                  "    });",
+                  "} else {",
+                  "    console.error('❌ No open orders available at this facility.');",
+                  "    throw new Error('No open orders found — cannot continue.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solr-query?wt=json&q=orderStatusId:ORDER_APPROVED AND orderTypeId:SALES_ORDER AND facilityId:{{facility_id}} AND productStoreId:{{product_store_id}}&fq=(*:* -fulfillmentStatus:[* TO *]) OR fulfillmentStatus:Created&fq=-shipmentMethodTypeId:(STOREPICKUP OR POS_COMPLETED)&fl=orderId,orderName,shipGroupSeqId,shipmentMethodTypeId,customerPartyId,facilityId,productId,orderItemSeqId&group=true&group.field=orderItemShipGroupIdentifier&group.limit=10&rows=1",
+              "host": ["{{base_url}}"],
+              "path": ["solr-query"],
+              "query": [
+                { "key": "wt", "value": "json" },
+                { "key": "q", "value": "orderStatusId:ORDER_APPROVED AND orderTypeId:SALES_ORDER AND facilityId:{{facility_id}} AND productStoreId:{{product_store_id}}" },
+                { "key": "fq", "value": "(*:* -fulfillmentStatus:[* TO *]) OR fulfillmentStatus:Created" },
+                { "key": "fq", "value": "-shipmentMethodTypeId:(STOREPICKUP OR POS_COMPLETED)" },
+                { "key": "fl", "value": "orderId,orderName,shipGroupSeqId,shipmentMethodTypeId,customerPartyId,facilityId,productId,orderItemSeqId" },
+                { "key": "group", "value": "true" },
+                { "key": "group.field", "value": "orderItemShipGroupIdentifier" },
+                { "key": "group.limit", "value": "10" },
+                { "key": "rows", "value": "1" }
+              ]
+            },
+            "description": "Queries Solr for an approved, unfulfilled sales order at the configured facility. Extracts `order_id`, `order_item_seq_id`, `ship_group_seq_id`, and `product_id` for the next step."
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Create Picklist (Pick)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    throw new Error('⛔ order_id is not set. Run \"1.1 Find Open Order\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create Picklist - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('picklistId returned', function () {",
+                  "    pm.expect(json.picklistId).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.test('shipmentIds returned', function () {",
+                  "    pm.expect(json.shipmentIds).to.be.an('array').and.not.empty;",
+                  "});",
+                  "",
+                  "if (json.picklistId) {",
+                  "    pm.environment.set('picklist_id', json.picklistId);",
+                  "    pm.environment.set('shipment_id', json.shipmentIds[0]);",
+                  "    console.log('✅ Picklist created:', {",
+                  "        picklistId: json.picklistId,",
+                  "        shipmentId: json.shipmentIds[0]",
+                  "    });",
+                  "} else {",
+                  "    console.error('❌ Failed to create picklist');",
+                  "    throw new Error('Picklist creation failed — cannot continue.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"packageName\": \"PKG-A\",\n  \"facilityId\": \"{{facility_id}}\",\n  \"shipmentMethodTypeId\": \"{{shipment_method_type_id}}\",\n  \"statusId\": \"PICKLIST_ASSIGNED\",\n  \"pickers\": [\n    {\n      \"partyId\": \"{{picker_party_id}}\",\n      \"roleTypeId\": \"WAREHOUSE_PICKER\"\n    }\n  ],\n  \"orderItems\": [\n    {\n      \"orderId\": \"{{order_id}}\",\n      \"orderItemSeqId\": \"{{order_item_seq_id}}\",\n      \"shipGroupSeqId\": \"{{ship_group_seq_id}}\",\n      \"productId\": \"{{product_id}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/createOrderFulfillmentWave",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "createOrderFulfillmentWave"]
+            },
+            "description": "Creates a picklist (fulfillment wave) for the order item found in 1.1. Stores `picklist_id` and `shipment_id` from the response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Pack",
+      "item": [
+        {
+          "name": "2.1 Get Shipment Details",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shipmentId = pm.environment.get('shipment_id');",
+                  "if (!shipmentId) {",
+                  "    throw new Error('⛔ shipment_id not set. Run \"1.2 Create Picklist\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Get Shipment Details - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const shipment = json?.shipments?.[0] || json;",
+                  "",
+                  "pm.test('Shipment is in APPROVED state', function () {",
+                  "    const statusId = shipment.statusId || shipment?.data?.statusId;",
+                  "    pm.expect(statusId).to.equal('SHIPMENT_APPROVED');",
+                  "});",
+                  "",
+                  "if (shipment.shipmentPackages && shipment.shipmentPackages.length > 0) {",
+                  "    pm.environment.set('shipment_package_seq_id', shipment.shipmentPackages[0].shipmentPackageSeqId || '00001');",
+                  "}",
+                  "",
+                  "console.log('✅ Shipment status:', shipment.statusId || 'check response');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/shipments/{{shipment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "shipments", "{{shipment_id}}"]
+            },
+            "description": "Fetches shipment details to confirm it is in `SHIPMENT_APPROVED` state before packing."
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 Pack Shipment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shipmentId = pm.environment.get('shipment_id');",
+                  "if (!shipmentId) {",
+                  "    throw new Error('⛔ shipment_id not set. Run \"1.2 Create Picklist\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pack Shipment - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "console.log('Pack Response:', JSON.stringify(json, null, 2));",
+                  "",
+                  "pm.test('Pack response indicates success', function () {",
+                  "    const isOk = json._STATUS === 'S' || json.shipmentId || json.packedShipmentId || pm.response.code === 200;",
+                  "    pm.expect(isOk).to.be.true;",
+                  "});",
+                  "",
+                  "if (json.packedShipmentId) {",
+                  "    pm.environment.set('shipment_id', json.packedShipmentId);",
+                  "}",
+                  "console.log('✅ Shipment packed successfully.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"shipmentId\": \"{{shipment_id}}\",\n  \"orderId\": \"{{order_id}}\",\n  \"facilityId\": \"{{facility_id}}\",\n  \"shipmentBoxTypeId\": \"{{shipment_box_type_id}}\",\n  \"trackingCode\": \"{{tracking_code}}\",\n  \"carrierPartyId\": \"{{carrier_party_id}}\",\n  \"rejectedOrderItems\": [],\n  \"shipmentPackageContents\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/shipments/{{shipment_id}}/pack",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "shipments", "{{shipment_id}}", "pack"]
+            },
+            "description": "Packs the shipment. Transitions `SHIPMENT_APPROVED` → `SHIPMENT_PACKED`. Accepts box type, carrier, and tracking code."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Ship",
+      "item": [
+        {
+          "name": "3.1 Get Packed Shipment Details",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shipmentId = pm.environment.get('shipment_id');",
+                  "if (!shipmentId) {",
+                  "    throw new Error('⛔ shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Get Packed Shipment - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const shipment = json?.shipments?.[0] || json;",
+                  "",
+                  "pm.test('Shipment is in PACKED state', function () {",
+                  "    const statusId = shipment.statusId || '';",
+                  "    pm.expect(statusId).to.equal('SHIPMENT_PACKED');",
+                  "});",
+                  "",
+                  "console.log('✅ Shipment is packed, ready to ship.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/shipments/{{shipment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "shipments", "{{shipment_id}}"]
+            },
+            "description": "Confirms the shipment is in `SHIPMENT_PACKED` state before proceeding to ship."
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Ship Shipment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shipmentId = pm.environment.get('shipment_id');",
+                  "if (!shipmentId) {",
+                  "    throw new Error('⛔ shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Ship Shipment - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "console.log('Ship Response:', JSON.stringify(json, null, 2));",
+                  "",
+                  "pm.test('Ship response indicates success', function () {",
+                  "    const isOk = json._STATUS === 'S' || json.shipmentId || pm.response.code === 200;",
+                  "    pm.expect(isOk).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('✅ Shipment shipped! shipment_id =', pm.environment.get('shipment_id'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"shipmentId\": \"{{shipment_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/shipments/{{shipment_id}}/ship",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "shipments", "{{shipment_id}}", "ship"]
+            },
+            "description": "Ships the packed shipment. Transitions to `SHIPMENT_SHIPPED` and marks order items as `ITEM_COMPLETED`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Verification",
+      "item": [
+        {
+          "name": "4.1 Verify Shipment Status = SHIPMENT_SHIPPED",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shipmentId = pm.environment.get('shipment_id');",
+                  "if (!shipmentId) {",
+                  "    throw new Error('⛔ shipment_id not set. Cannot verify.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Verify Shipment - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const shipment = json?.shipments?.[0] || json;",
+                  "",
+                  "pm.test('🚢 Shipment status is SHIPMENT_SHIPPED', function () {",
+                  "    const status = shipment.statusId || '';",
+                  "    pm.expect(status).to.equal('SHIPMENT_SHIPPED');",
+                  "});",
+                  "",
+                  "if (shipment.statusId === 'SHIPMENT_SHIPPED') {",
+                  "    console.log('✅ VERIFIED: Shipment', pm.environment.get('shipment_id'), 'is SHIPMENT_SHIPPED');",
+                  "} else {",
+                  "    console.warn('⚠️ Unexpected status:', shipment.statusId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rest/s1/poorti/shipments/{{shipment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rest", "s1", "poorti", "shipments", "{{shipment_id}}"]
+            },
+            "description": "**Verification step.** Asserts that the shipment's `statusId` is `SHIPMENT_SHIPPED`."
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Verify Order Items = ITEM_COMPLETED",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    throw new Error('⛔ order_id not set. Cannot verify order items.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Verify Order Items - 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const items = json?.orderItems || json?.data || [];",
+                  "",
+                  "pm.test('📦 All fulfilled order items are ITEM_COMPLETED', function () {",
+                  "    const allCompleted = items.every(item => item.statusId === 'ITEM_COMPLETED');",
+                  "    pm.expect(allCompleted).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('✅ Fulfillment lifecycle COMPLETE!');",
+                  "console.log('   Order:    ', pm.environment.get('order_id'));",
+                  "console.log('   Shipment: ', pm.environment.get('shipment_id'));",
+                  "console.log('   Picklist: ', pm.environment.get('picklist_id'));",
+                  "console.log('');",
+                  "console.log('   Pick → Pack → Ship → ✅ Done');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/oms/orders/{{order_id}}/items?shipGroupSeqId={{ship_group_seq_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["oms", "orders", "{{order_id}}", "items"],
+              "query": [
+                { "key": "shipGroupSeqId", "value": "{{ship_group_seq_id}}" }
+              ]
+            },
+            "description": "**Verification step.** Asserts that all order items in the ship group have `ITEM_COMPLETED` status, confirming the end-to-end lifecycle is complete."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

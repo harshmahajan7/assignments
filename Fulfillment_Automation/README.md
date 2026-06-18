@@ -1,63 +1,79 @@
-# Fulfillment Automation — Pick → Pack → Ship
+# OMS Fulfillment Lifecycle Automation
 
-This folder contains a Postman collection that automates the complete OMS order fulfillment lifecycle **without using the application UI**.
+Automates the complete **Pick → Pack → Ship** fulfillment lifecycle using the OMS (HotWax Commerce) API — no UI interaction required.
 
-## Flow
+## Overview
 
 ```
-auth  →  pick (createOrderFulfillmentWave)  →  pack  →  ship
+0.1 Login
+ └─ sets: api_token
+1.1 Find Open Order       (Solr query)
+ └─ sets: order_id, order_item_seq_id, ship_group_seq_id, product_id
+1.2 Create Picklist       (Pick)
+ └─ sets: picklist_id, shipment_id
+2.1 Get Shipment Details  (assert SHIPMENT_APPROVED)
+2.2 Pack Shipment         (SHIPMENT_APPROVED → SHIPMENT_PACKED)
+3.1 Get Packed Shipment   (assert SHIPMENT_PACKED)
+3.2 Ship Shipment         (SHIPMENT_PACKED → SHIPMENT_SHIPPED)
+4.1 Verify Shipment       (assert SHIPMENT_SHIPPED)
+4.2 Verify Order Items    (assert ITEM_COMPLETED)
 ```
-
-| Step | Request | Method | Endpoint |
-|------|---------|--------|----------|
-| 1 | **auth** | POST | `https://nextgen-oms.hotwax.io/api/login` |
-| 2 | **pick** | POST | `https://nextgen-maarg.hotwax.io/rest/s1/poorti/createOrderFulfillmentWave` |
-| 3 | **pack** | POST | `https://nextgen-maarg.hotwax.io/rest/s1/poorti/shipments/{shipmentId}/pack` |
-| 4 | **ship** | POST | `https://nextgen-maarg.hotwax.io/rest/s1/poorti/shipments/{shipmentId}/ship` |
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `pick_pack_ship.json` | Postman collection (import into Postman) |
+| `OMS_Fulfillment_Lifecycle_Collection.json` | Postman Collection v2.1.0 with all 8 requests and automation scripts |
+| `OMS_Fulfillment_Dev_Environment.json` | Postman Environment with all configurable & auto-set variables |
 
-## How to Use
+## Setup
 
-1. **Import** `pick_pack_ship.json` into Postman.
-2. Set collection variables:
-   - `username` — your OMS username (e.g., `hotwax.user`)
-   - `password` — your OMS password (**never hardcode in the file**)
-3. Run **auth** first — the test script auto-saves the token to `auth_secret_0s0e`.
-4. Run **pick** — creates a fulfillment wave; test script saves `shipment_id`.
-5. Run **pack** — packs the shipment.
-6. Run **ship** — marks shipment as `SHIPMENT_SHIPPED`.
+1. **Import** both files into Postman (File → Import).
+2. **Select** the `OMS Fulfillment - Dev` environment from the top-right dropdown.
+3. **Configure** these variables in the environment (pre-filled with defaults):
 
-## Key Parameters (in pick request body)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `base_url` | `https://nextgen-oms.hotwax.io` | OMS instance URL (no trailing slash) |
+| `username` | `hotwax.user` | OMS login username |
+| `password` | `hotwax@123` | OMS login password (secret) |
+| `facility_id` | `DEMO_FACILITY` | Fulfillment facility ID |
+| `product_store_id` | `STORE` | Product store ID |
+| `picker_party_id` | `_NA_` | Picker's partyId |
+| `carrier_party_id` | `_NA_` | Carrier party ID |
+| `shipment_method_type_id` | `STANDARD` | Shipping method |
+| `shipment_box_type_id` | `YOURPACKNG` | Box type for packing |
+| `tracking_code` | `TRACK123456` | Carrier tracking number |
 
-```json
-{
-  "facilityId": "MAPLEWOOD",
-  "shipmentMethodTypeId": "STANDARD",
-  "orderItems": [
-    {
-      "orderId": "M102719",
-      "orderItemSeqId": "02",
-      "shipGroupSeqId": "00006",
-      "productId": "M103006",
-      "quantity": 1
-    }
-  ]
-}
+## Running the Collection
+
+### Option A: Collection Runner (Full Automation)
+1. Click **Run collection** in Postman.
+2. Select `OMS Fulfillment - Dev` environment.
+3. Click **Run OMS Fulfillment Lifecycle**.
+4. All 8 requests execute in sequence with variables chained automatically.
+
+### Option B: Individual Requests
+Run each request manually in order (0.1 → 1.1 → 1.2 → 2.1 → 2.2 → 3.1 → 3.2 → 4.1 → 4.2).
+
+## Variable Chaining (Data Flow)
+
+Variables are automatically passed between requests using `pm.environment.set()` in test scripts:
+
+```
+Login ──────────────────────────→ api_token
+Find Open Order ────────────────→ order_id, order_item_seq_id,
+                                   ship_group_seq_id, product_id
+Create Picklist (Pick) ─────────→ picklist_id, shipment_id
+Pack Shipment ──────────────────→ (uses shipment_id)
+Ship Shipment ──────────────────→ (uses shipment_id)
 ```
 
-> **Note:** Update `orderId`, `orderItemSeqId`, `shipGroupSeqId`, and `shipmentId` with real values from your OMS instance before running.
+## Guard Rails
 
-## Status Lifecycle
+Each request includes a **pre-request script** that throws an error and halts execution if required variables are missing. This prevents partial or invalid API calls.
 
-```
-ITEM_APPROVED
-  └─[pick]──► SHIPMENT_APPROVED
-                  └─[pack]──► SHIPMENT_PACKED
-                                  └─[ship]──► SHIPMENT_SHIPPED ✅
-                                                  └──► ITEM_COMPLETED
-```
+## Postman Links
+
+- **Collection**: [OMS Fulfillment Lifecycle - Pick → Pack → Ship](https://go.postman.co/workspace/My-Workspace~a032a408-2e60-4ea0-8b9b-aca9ade00aa1/collection/30768967-0367c985-f4d0-494b-9fa4-c4ade2d8d367)
+- **Environment**: [OMS Fulfillment - Dev](https://go.postman.co/workspace/My-Workspace~a032a408-2e60-4ea0-8b9b-aca9ade00aa1/environment/30768967-4a2a0448-8fd4-4226-ac26-b9cca3a4ddb8)

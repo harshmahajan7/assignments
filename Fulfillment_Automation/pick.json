@@ -252,7 +252,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"USERNAME\": \"{{username}}\",\n  \"PASSWORD\": \"{{password}}\"\n}",
+          "raw": "{\n  \"USERNAME\": \"hotwax.user\",\n  \"PASSWORD\": \"hotwax@123\"\n}",
           "options": {
             "raw": {
               "language": "json"
