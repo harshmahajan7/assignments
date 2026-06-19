@@ -22,7 +22,7 @@
               "    var token = json.token || json.TOKEN;",
               "    pm.expect(token).to.be.a('string').and.not.empty;",
               "    pm.collectionVariables.set('auth_secret_0s0e', token);",
-              "    console.log('✅ Token saved:', token.substring(0, 20) + '...');",
+              "    console.log(' Token saved:', token.substring(0, 20) + '...');",
               "});"
             ],
             "type": "text/javascript"
@@ -74,7 +74,7 @@
               "        || (json.shipments && json.shipments[0] && json.shipments[0].shipmentId);",
               "    if (shipmentId) {",
               "        pm.collectionVariables.set('shipment_id', shipmentId);",
-              "        console.log('✅ shipment_id:', shipmentId);",
+              "        console.log(' shipment_id:', shipmentId);",
               "    }",
               "    console.log('Pick response:', JSON.stringify(json).substring(0, 300));",
               "});"
@@ -134,7 +134,7 @@
               "pm.test('Shipment packed successfully', function () {",
               "    var json = pm.response.json();",
               "    pm.expect(json._ERROR_MESSAGE_).to.be.undefined;",
-              "    console.log('✅ Pack response:', JSON.stringify(json).substring(0, 200));",
+              "    console.log(' Pack response:', JSON.stringify(json).substring(0, 200));",
               "});"
             ],
             "type": "text/javascript"
@@ -193,7 +193,7 @@
               "    var json = pm.response.json();",
               "    pm.expect(json._ERROR_MESSAGE_).to.be.undefined;",
               "    pm.expect(json.errorMessage).to.be.undefined;",
-              "    console.log('✅ Ship response:', JSON.stringify(json).substring(0, 200));",
+              "    console.log(' Ship response:', JSON.stringify(json).substring(0, 200));",
               "});"
             ],
             "type": "text/javascript"
