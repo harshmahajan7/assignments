@@ -62,9 +62,9 @@
                   "",
                   "if (json.token) {",
                   "    pm.environment.set('api_token', json.token);",
-                  "    console.log('✅ api_token set:', json.token.substring(0, 20) + '...');",
+                  "    console.log('api_token set:', json.token.substring(0, 20) + '...');",
                   "} else {",
-                  "    console.error('❌ Login failed - no token in response');",
+                  "    console.error('Login failed - no token in response');",
                   "    throw new Error('Login failed - cannot continue');",
                   "}"
                 ]
@@ -125,14 +125,14 @@
                   "    pm.environment.set('ship_group_seq_id', firstDoc.shipGroupSeqId || '00001');",
                   "    pm.environment.set('product_id',        firstDoc.productId);",
                   "",
-                  "    console.log('✅ Order found:', {",
+                  "    console.log('Order found:', {",
                   "        orderId:        firstDoc.orderId,",
                   "        orderItemSeqId: firstDoc.orderItemSeqId,",
                   "        shipGroupSeqId: firstDoc.shipGroupSeqId,",
                   "        productId:      firstDoc.productId",
                   "    });",
                   "} else {",
-                  "    console.error('❌ No open orders available at this facility.');",
+                  "    console.error('No open orders available at this facility.');",
                   "    throw new Error('No open orders found — cannot continue.');",
                   "}"
                 ]
@@ -172,7 +172,7 @@
                 "exec": [
                   "const orderId = pm.environment.get('order_id');",
                   "if (!orderId) {",
-                  "    throw new Error('⛔ order_id is not set. Run \"1.1 Find Open Order\" first.');",
+                  "    throw new Error('order_id is not set. Run \"1.1 Find Open Order\" first.');",
                   "}"
                 ]
               }
@@ -199,12 +199,12 @@
                   "if (json.picklistId) {",
                   "    pm.environment.set('picklist_id', json.picklistId);",
                   "    pm.environment.set('shipment_id', json.shipmentIds[0]);",
-                  "    console.log('✅ Picklist created:', {",
+                  "    console.log('Picklist created:', {",
                   "        picklistId: json.picklistId,",
                   "        shipmentId: json.shipmentIds[0]",
                   "    });",
                   "} else {",
-                  "    console.error('❌ Failed to create picklist');",
+                  "    console.error('Failed to create picklist');",
                   "    throw new Error('Picklist creation failed — cannot continue.');",
                   "}"
                 ]
@@ -245,7 +245,7 @@
                 "exec": [
                   "const shipmentId = pm.environment.get('shipment_id');",
                   "if (!shipmentId) {",
-                  "    throw new Error('⛔ shipment_id not set. Run \"1.2 Create Picklist\" first.');",
+                  "    throw new Error('shipment_id not set. Run \"1.2 Create Picklist\" first.');",
                   "}"
                 ]
               }
@@ -271,7 +271,7 @@
                   "    pm.environment.set('shipment_package_seq_id', shipment.shipmentPackages[0].shipmentPackageSeqId || '00001');",
                   "}",
                   "",
-                  "console.log('✅ Shipment status:', shipment.statusId || 'check response');"
+                  "console.log('Shipment status:', shipment.statusId || 'check response');"
                 ]
               }
             }
@@ -298,7 +298,7 @@
                 "exec": [
                   "const shipmentId = pm.environment.get('shipment_id');",
                   "if (!shipmentId) {",
-                  "    throw new Error('⛔ shipment_id not set. Run \"1.2 Create Picklist\" first.');",
+                  "    throw new Error('shipment_id not set. Run \"1.2 Create Picklist\" first.');",
                   "}"
                 ]
               }
@@ -323,7 +323,7 @@
                   "if (json.packedShipmentId) {",
                   "    pm.environment.set('shipment_id', json.packedShipmentId);",
                   "}",
-                  "console.log('✅ Shipment packed successfully.');"
+                  "console.log('Shipment packed successfully.');"
                 ]
               }
             }
@@ -362,7 +362,7 @@
                 "exec": [
                   "const shipmentId = pm.environment.get('shipment_id');",
                   "if (!shipmentId) {",
-                  "    throw new Error('⛔ shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
+                  "    throw new Error('shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
                   "}"
                 ]
               }
@@ -384,7 +384,7 @@
                   "    pm.expect(statusId).to.equal('SHIPMENT_PACKED');",
                   "});",
                   "",
-                  "console.log('✅ Shipment is packed, ready to ship.');"
+                  "console.log('Shipment is packed, ready to ship.');"
                 ]
               }
             }
@@ -411,7 +411,7 @@
                 "exec": [
                   "const shipmentId = pm.environment.get('shipment_id');",
                   "if (!shipmentId) {",
-                  "    throw new Error('⛔ shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
+                  "    throw new Error('shipment_id not set. Run \"2.2 Pack Shipment\" first.');",
                   "}"
                 ]
               }
@@ -433,7 +433,7 @@
                   "    pm.expect(isOk).to.be.true;",
                   "});",
                   "",
-                  "console.log('✅ Shipment shipped! shipment_id =', pm.environment.get('shipment_id'));"
+                  "console.log('Shipment shipped! shipment_id =', pm.environment.get('shipment_id'));"
                 ]
               }
             }
@@ -472,7 +472,7 @@
                 "exec": [
                   "const shipmentId = pm.environment.get('shipment_id');",
                   "if (!shipmentId) {",
-                  "    throw new Error('⛔ shipment_id not set. Cannot verify.');",
+                  "    throw new Error('shipment_id not set. Cannot verify.');",
                   "}"
                 ]
               }
@@ -495,9 +495,9 @@
                   "});",
                   "",
                   "if (shipment.statusId === 'SHIPMENT_SHIPPED') {",
-                  "    console.log('✅ VERIFIED: Shipment', pm.environment.get('shipment_id'), 'is SHIPMENT_SHIPPED');",
+                  "    console.log('VERIFIED: Shipment', pm.environment.get('shipment_id'), 'is SHIPMENT_SHIPPED');",
                   "} else {",
-                  "    console.warn('⚠️ Unexpected status:', shipment.statusId);",
+                  "    console.warn('Unexpected status:', shipment.statusId);",
                   "}"
                 ]
               }
@@ -525,7 +525,7 @@
                 "exec": [
                   "const orderId = pm.environment.get('order_id');",
                   "if (!orderId) {",
-                  "    throw new Error('⛔ order_id not set. Cannot verify order items.');",
+                  "    throw new Error('order_id not set. Cannot verify order items.');",
                   "}"
                 ]
               }
@@ -542,17 +542,17 @@
                   "const json = pm.response.json();",
                   "const items = json?.orderItems || json?.data || [];",
                   "",
-                  "pm.test('📦 All fulfilled order items are ITEM_COMPLETED', function () {",
+                  "pm.test('All fulfilled order items are ITEM_COMPLETED', function () {",
                   "    const allCompleted = items.every(item => item.statusId === 'ITEM_COMPLETED');",
                   "    pm.expect(allCompleted).to.be.true;",
                   "});",
                   "",
-                  "console.log('✅ Fulfillment lifecycle COMPLETE!');",
+                  "console.log('Fulfillment lifecycle COMPLETE!');",
                   "console.log('   Order:    ', pm.environment.get('order_id'));",
                   "console.log('   Shipment: ', pm.environment.get('shipment_id'));",
                   "console.log('   Picklist: ', pm.environment.get('picklist_id'));",
                   "console.log('');",
-                  "console.log('   Pick → Pack → Ship → ✅ Done');"
+                  "console.log('   Pick → Pack → Ship →  Done');"
                 ]
               }
             }
