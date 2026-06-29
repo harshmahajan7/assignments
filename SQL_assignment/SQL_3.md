@@ -1,341 +1,144 @@
-# SQL Queries Documentation
+# SQL Queries Documentation (Updated)
 
-## 1. Completed Sales Orders (Physical Items)
+---
 
-### Business Problem
-Merchants need to track only physical items (requiring shipping and fulfillment) for logistics and shipping-cost analysis.
+# 8. Orders Without Shipment / Payment Issue
 
-### Fields to Retrieve
+## Business Problem
+Identify orders where payment is completed but shipment is not shipped.
+
+## Fields
 - ORDER_ID
-- ORDER_ITEM_SEQ_ID
-- PRODUCT_ID
-- PRODUCT_TYPE_ID
-- SALES_CHANNEL_ENUM_ID
-- ORDER_DATE
-- ENTRY_DATE
-- STATUS_ID
-- STATUS_DATETIME
-- ORDER_TYPE_ID
-- PRODUCT_STORE_ID
+- ORDER_STATUS
+- PAYMENT_STATUS
+- SHIPPING_STATUS
 
-### SQL Query
+## SQL Query
 
 ```sql
-SELECT
-    oi.ORDER_ID,
-    oi.ORDER_ITEM_SEQ_ID,
-    oi.PRODUCT_ID,
-    p.PRODUCT_TYPE_ID,
-    oh.SALES_CHANNEL_ENUM_ID,
-    oh.ORDER_DATE,
-    oh.ENTRY_DATE,
+SELECT 
+    oh.order_id,
     oh.STATUS_ID,
-    os.STATUS_DATETIME,
-    oh.ORDER_TYPE_ID,
-    oh.PRODUCT_STORE_ID
+    opp.STATUS_ID AS Payment_Status,
+    s.STATUS_ID AS SHIPPING_Status
 
-FROM order_item oi
+FROM order_header oh
 
-JOIN product p
-ON oi.PRODUCT_ID = p.PRODUCT_ID
+LEFT JOIN order_payment_preference opp
+ON oh.order_id = opp.order_id
 
-JOIN order_status os
-ON oi.ORDER_ID = os.ORDER_ID
+LEFT JOIN shipment s
+ON oh.ORDER_id = s.PRIMARY_ORDER_ID
 
-JOIN order_header oh
-ON oi.ORDER_ID = oh.ORDER_ID
-
-JOIN product_type pt
-ON p.PRODUCT_TYPE_ID = pt.PRODUCT_TYPE_ID
-
-WHERE pt.IS_PHYSICAL = 'Y'
-AND oh.STATUS_ID = 'ORDER_COMPLETED'
-AND oh.ORDER_TYPE_ID = 'SALES_ORDER';
-```
-
----
-
-# 2. Completed Return Items
-
-## Business Problem
-Customer service and finance need return insights for refunds, replacements, and inventory restocking.
-
-## Fields to Retrieve
-- RETURN_ID
-- ORDER_ID
-- PRODUCT_STORE_ID
-- STATUS_DATETIME
-- ORDER_NAME
-- FROM_PARTY_ID
-- RETURN_DATE
-- ENTRY_DATE
-- RETURN_CHANNEL_ENUM_ID
-
-### SQL Query
-
-```sql
-SELECT
-    rh.RETURN_ID,
-    ri.ORDER_ID,
-    oh.PRODUCT_STORE_ID,
-    rs.STATUS_DATETIME,
-    oh.ORDER_NAME,
-    rh.FROM_PARTY_ID,
-    rh.RETURN_DATE,
-    rh.ENTRY_DATE,
-    rh.RETURN_CHANNEL_ENUM_ID
-
-FROM return_header rh
-
-JOIN return_item ri
-ON rh.RETURN_ID = ri.RETURN_ID
-
-JOIN return_status rs
-ON rh.RETURN_ID = rs.RETURN_ID
-
-JOIN order_header oh
-ON ri.ORDER_ID = oh.ORDER_ID
-
-WHERE rh.RETURN_HEADER_TYPE_ID='CUSTOMER_RETURN'
-AND rh.STATUS_ID='RETURN_COMPLETED';
-```
-
----
-
-# 3. Single-Return Orders
-
-## Business Problem
-Find customers/orders having only one return.
-
-### Fields
-- PARTY_ID
-- FIRST_NAME
-
-### SQL Query
-
-```sql
-SELECT
-    p.PARTY_ID,
-    p.FIRST_NAME
-
-FROM person p
-
-JOIN return_header rh
-ON p.PARTY_ID = rh.FROM_PARTY_ID
-
-GROUP BY
-    p.PARTY_ID,
-    p.FIRST_NAME
-
-HAVING COUNT(DISTINCT rh.RETURN_ID)=1;
-```
-
----
-
-# 4. Returns and Appeasements
-
-## Business Problem
-Find total returned amount and appeasement amount.
-
-### SQL Query
-
-```sql
-SELECT
-
-SUM(ri.RETURN_QUANTITY * ri.RETURN_PRICE) AS TOTAL_RETURN_AMOUNT,
-
-COUNT(DISTINCT ri.RETURN_ID) AS TOTAL_RETURNS,
-
-SUM(ra.AMOUNT) AS TOTAL_APPEASEMENTS_AMOUNT,
-
-COUNT(DISTINCT ra.RETURN_ADJUSTMENT_ID) AS TOTAL_APPEASEMENTS
-
-FROM return_header rh
-
-JOIN return_item ri
-ON rh.RETURN_ID = ri.RETURN_ID
-
-JOIN return_adjustment ra
-ON rh.RETURN_ID = ra.RETURN_ID
-
-WHERE RETURN_ADJUSTMENT_TYPE_ID='APPEASEMENTS';
-```
-
----
-
-# 5. Detailed Return Information
-
-### Fields
-- RETURN_ID
-- ENTRY_DATE
-- RETURN_ADJUSTMENT_TYPE_ID
-- AMOUNT
-- COMMENTS
-- ORDER_ID
-- ORDER_DATE
-- RETURN_DATE
-- PRODUCT_STORE_ID
-
-### SQL Query
-
-```sql
-SELECT
-
-rh.RETURN_ID,
-rh.ENTRY_DATE,
-ra.RETURN_ADJUSTMENT_TYPE_ID,
-ra.AMOUNT,
-ra.COMMENTS,
-ri.ORDER_ID,
-oh.ORDER_DATE,
-rh.RETURN_DATE,
-oh.PRODUCT_STORE_ID
-
-FROM return_header rh
-
-JOIN return_item ri
-ON rh.RETURN_ID = ri.RETURN_ID
-
-JOIN return_adjustment ra
-ON ri.RETURN_ITEM_SEQ_ID = ra.RETURN_ITEM_SEQ_ID
-AND ri.RETURN_ID = ra.RETURN_ID
-
-JOIN order_header oh
-ON ri.ORDER_ID = oh.ORDER_ID;
-```
-
----
-
-# 6. Orders with Multiple Returns
-
-```sql
-SELECT
-
-ri.ORDER_ID,
-ri.RETURN_ID,
-rh.RETURN_DATE,
-ri.RETURN_REASON_ID AS RETURN_REASON,
-ri.RETURN_QUANTITY
-
-FROM return_header rh
-
-JOIN return_item ri
-ON rh.RETURN_ID = ri.RETURN_ID
-
-WHERE ri.ORDER_ID IN
+WHERE 
 (
-    SELECT ORDER_ID
-    FROM return_item
-    GROUP BY ORDER_ID
-    HAVING COUNT(ORDER_ID)>1
+    opp.status_id = 'PAYMENT_SETTLED'
+    OR opp.status_id = 'Payment_Received'
+)
+AND
+(
+    s.status_id != 'SHIPMENT_SHIPPED'
+    OR s.status_id IS NULL
 );
 ```
 
 ---
 
-# 7. Store with Most One-Day Shipped Orders
+# 10. Store Pickup Orders Revenue (Last 1 Year)
+
+## Business Problem
+Calculate total store pickup orders and revenue generated.
+
+## Fields
+- TOTAL ORDERS
+- TOTAL REVENUE
+
+## SQL Query
 
 ```sql
-SELECT
+SELECT 
 
-f.FACILITY_ID,
-f.FACILITY_NAME,
+COUNT(DISTINCT oh.ORDER_ID) AS total_orders,
 
-COUNT(DISTINCT oh.ORDER_ID) AS TOTAL_ONE_DAY_SHIP_ORDERS,
+SUM(
+    CASE
+        WHEN oisg.shipment_method_type_id = 'STOREPICKUP'
+        THEN oi.quantity * oi.unit_price
+        ELSE 0
+    END
+) AS total_revenue
 
-DATE_FORMAT(
-DATE_SUB(CURDATE(),INTERVAL 1 MONTH),
-'%Y-%m'
-) AS REPORTING_PERIOD
+FROM order_header oh
 
-FROM facility f
+JOIN order_item oi
+ON oh.order_id = oi.order_id
 
-JOIN shipment s
-ON f.FACILITY_ID=s.ORIGIN_FACILITY_ID
+JOIN order_item_ship_group oisg
+ON oi.order_id = oisg.order_id
+AND oi.ship_group_seq_id = oisg.ship_group_seq_id
 
-JOIN order_header oh
-ON s.PRIMARY_ORDER_ID=oh.ORDER_ID
+WHERE oh.order_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
 
-GROUP BY
-f.FACILITY_ID,
-f.FACILITY_NAME
-
-ORDER BY TOTAL_ONE_DAY_SHIP_ORDERS DESC
-
-LIMIT 1;
+AND oisg.shipment_method_type_id = 'STOREPICKUP';
 ```
 
 ---
 
-# 8. List of Warehouse Pickers
+# 11. Cancelled Orders Reason Analysis
+
+## Business Problem
+Find number of cancelled orders grouped by cancellation reason.
 
 ## Fields
-- PARTY_ID
-- NAME
-- ROLE_TYPE_ID
-- FACILITY_ID
-- STATUS
+- TOTAL ORDERS
+- CANCELLATION REASON
 
-
----
-
-# 9. Total Facilities That Sell the Product
-
-## Fields
-- PRODUCT_ID
-- PRODUCT_NAME
-- FACILITY_COUNT
-- FACILITY_ID LIST
-
-
----
-
-# 10. Inventory in Facilities
+## SQL Query
 
 ```sql
 SELECT
 
-pf.PRODUCT_ID,
-pf.FACILITY_ID,
-f.FACILITY_TYPE_ID,
+COUNT(DISTINCT oh.order_id) AS total_orders,
 
-ii.QUANTITY_ON_HAND_TOTAL AS QOH,
+os.change_reason AS cancellation_reason
 
-ii.AVAILABLE_TO_PROMISE_TOTAL AS ATP
 
-FROM product_facility pf
+FROM order_header oh
 
-JOIN facility f
-ON pf.FACILITY_ID=f.FACILITY_ID
+JOIN order_status os
 
-JOIN inventory_item ii
+ON oh.order_id = os.order_id
 
-ON pf.PRODUCT_ID=ii.PRODUCT_ID
-AND pf.FACILITY_ID=ii.FACILITY_ID;
+
+WHERE oh.status_id = 'ORDER_CANCELLED'
+
+
+GROUP BY os.change_reason;
 ```
 
 ---
 
-# 11. Transfer Orders Without Inventory Reservation
+# 12. Product Minimum Stock Threshold
+
+## Business Problem
+Retrieve minimum inventory threshold configured for products.
 
 ## Fields
-- TRANSFER_ORDER_ID
-- FROM_FACILITY_ID
-- TO_FACILITY_ID
 - PRODUCT_ID
-- REQUESTED_QUANTITY
-- RESERVED_QUANTITY
-- TRANSFER_DATE
-- STATUS
+- MINIMUM STOCK THRESHOLD
 
+
+## SQL Query
+
+```sql
+SELECT
+
+product_id,
+
+minimum_stock AS threshold
+
+
+FROM product_facility;
+```
 
 ---
-
-# 12. Orders Without Picklist
-
-## Fields
-- ORDER_ID
-- ORDER_DATE
-- ORDER_STATUS
-- FACILITY_ID
-- DURATION
