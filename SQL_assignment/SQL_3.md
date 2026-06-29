@@ -1,144 +1,186 @@
-https://docs.google.com/document/d/1NbIJYdcJmaPYZnR8O8N_JQW9b_7mJpzhlCSIDO5tL90/edit?usp=sharing
+# SQL Queries Documentation
 
-1 Completed Sales Orders (Physical Items)
-Business Problem:
+## 1. Completed Sales Orders (Physical Items)
+
+### Business Problem
 Merchants need to track only physical items (requiring shipping and fulfillment) for logistics and shipping-cost analysis.
-Fields to Retrieve:
-ORDER_ID
-ORDER_ITEM_SEQ_ID
-PRODUCT_ID
-PRODUCT_TYPE_ID
-SALES_CHANNEL_ENUM_ID
-ORDER_DATE
-ENTRY_DATE
-STATUS_ID
-STATUS_DATETIME
-ORDER_TYPE_ID
-PRODUCT_STORE_ID
-select
-oi.ORDER_ID,
-oi.ORDER_ITEM_SEQ_ID,
-oi.PRODUCT_ID,
-p.PRODUCT_TYPE_ID,
-oh.SALES_CHANNEL_ENUM_ID,
-oh.ORDER_DATE,
-oh.ENTRY_DATE,
-oh.STATUS_ID,
-os.STATUS_DATETIME,
-oh.ORDER_TYPE_ID,
-oh.PRODUCT_STORE_ID
 
-from order_item oi
+### Fields to Retrieve
+- ORDER_ID
+- ORDER_ITEM_SEQ_ID
+- PRODUCT_ID
+- PRODUCT_TYPE_ID
+- SALES_CHANNEL_ENUM_ID
+- ORDER_DATE
+- ENTRY_DATE
+- STATUS_ID
+- STATUS_DATETIME
+- ORDER_TYPE_ID
+- PRODUCT_STORE_ID
 
-join product p
-on oi.PRODUCT_ID = p.PRODUCT_ID
+### SQL Query
 
-join order_status os
-on oi.order_id = os.order_id
-
-join order_header oh
-on oi.order_id = oh.ORDER_ID
-
-join product_type pt
-on p.PRODUCT_TYPE_ID = pt.PRODUCT_TYPE_ID
-
-where pt.IS_PHYSICAL= 'Y'
-AND oh.status_id='ORDER_COMPLETED'
-AND oh.order_type_id='SALES_ORDER';
-
-2 Completed Return Items
-Business Problem:
-Customer service and finance often need insights into returned items to manage refunds, replacements, and inventory restocking.
-Fields to Retrieve:
-RETURN_ID
-ORDER_ID
-PRODUCT_STORE_ID
-STATUS_DATETIME
-ORDER_NAME
-FROM_PARTY_ID
-RETURN_DATE
-ENTRY_DATE
-RETURN_CHANNEL_ENUM_ID
+```sql
 SELECT
-rh.return_id,
-ri.order_id,
-oh.product_store_id,
-rs.status_datetime,
-oh.order_name,
-rh.from_party_id,
-rh.return_date,
-rh.entry_date,
-rh.return_channel_enum_id
+    oi.ORDER_ID,
+    oi.ORDER_ITEM_SEQ_ID,
+    oi.PRODUCT_ID,
+    p.PRODUCT_TYPE_ID,
+    oh.SALES_CHANNEL_ENUM_ID,
+    oh.ORDER_DATE,
+    oh.ENTRY_DATE,
+    oh.STATUS_ID,
+    os.STATUS_DATETIME,
+    oh.ORDER_TYPE_ID,
+    oh.PRODUCT_STORE_ID
+
+FROM order_item oi
+
+JOIN product p
+ON oi.PRODUCT_ID = p.PRODUCT_ID
+
+JOIN order_status os
+ON oi.ORDER_ID = os.ORDER_ID
+
+JOIN order_header oh
+ON oi.ORDER_ID = oh.ORDER_ID
+
+JOIN product_type pt
+ON p.PRODUCT_TYPE_ID = pt.PRODUCT_TYPE_ID
+
+WHERE pt.IS_PHYSICAL = 'Y'
+AND oh.STATUS_ID = 'ORDER_COMPLETED'
+AND oh.ORDER_TYPE_ID = 'SALES_ORDER';
+```
+
+---
+
+# 2. Completed Return Items
+
+## Business Problem
+Customer service and finance need return insights for refunds, replacements, and inventory restocking.
+
+## Fields to Retrieve
+- RETURN_ID
+- ORDER_ID
+- PRODUCT_STORE_ID
+- STATUS_DATETIME
+- ORDER_NAME
+- FROM_PARTY_ID
+- RETURN_DATE
+- ENTRY_DATE
+- RETURN_CHANNEL_ENUM_ID
+
+### SQL Query
+
+```sql
+SELECT
+    rh.RETURN_ID,
+    ri.ORDER_ID,
+    oh.PRODUCT_STORE_ID,
+    rs.STATUS_DATETIME,
+    oh.ORDER_NAME,
+    rh.FROM_PARTY_ID,
+    rh.RETURN_DATE,
+    rh.ENTRY_DATE,
+    rh.RETURN_CHANNEL_ENUM_ID
+
 FROM return_header rh
 
 JOIN return_item ri
-ON rh.return_id = ri.return_id
+ON rh.RETURN_ID = ri.RETURN_ID
 
 JOIN return_status rs
-ON rh.return_id = rs.return_id
+ON rh.RETURN_ID = rs.RETURN_ID
 
 JOIN order_header oh
-ON ri.order_id = oh.order_id
+ON ri.ORDER_ID = oh.ORDER_ID
 
-WHERE rh.return_header_type_id='CUSTOMER_RETURN'
-AND rh.status_id='RETURN_COMPLETED';
+WHERE rh.RETURN_HEADER_TYPE_ID='CUSTOMER_RETURN'
+AND rh.STATUS_ID='RETURN_COMPLETED';
+```
 
-3 Single-Return Orders (Last Month)
-Business Problem:
-The mechandising team needs a list of orders that only have one return.
-Fields to Retrieve:
-PARTY_ID
-FIRST_NAME
+---
+
+# 3. Single-Return Orders
+
+## Business Problem
+Find customers/orders having only one return.
+
+### Fields
+- PARTY_ID
+- FIRST_NAME
+
+### SQL Query
+
+```sql
 SELECT
-p.party_id,
-p.first_name
+    p.PARTY_ID,
+    p.FIRST_NAME
+
 FROM person p
 
 JOIN return_header rh
-ON p.party_id = rh.from_party_id
+ON p.PARTY_ID = rh.FROM_PARTY_ID
 
-GROUP BY p.party_id, p.first_name
-HAVING COUNT(DISTINCT rh.return_id) = 1;
+GROUP BY
+    p.PARTY_ID,
+    p.FIRST_NAME
 
-4 Returns and Appeasements
-Business Problem:
-The retailer needs the total amount of items, were returned as well as how many appeasements were issued.
-Fields to Retrieve:
-TOTAL RETURNS
-RETURN $ TOTAL
-TOTAL APPEASEMENTS
-APPEASEMENTS $ TOTAL
-select
-sum(ri.RETURN_QUANTITY \* ri.RETURN_PRICE) as 'Total return Amount',
-count(DISTINCT ri.RETURN_ID) as 'TOTAL RETURNS',
+HAVING COUNT(DISTINCT rh.RETURN_ID)=1;
+```
 
-sum(ra.AMOUNT) as 'Total APPEASEMENTS Amount',
-count(DISTINCT ra.RETURN_ADJUSTMENT_ID) as 'TOTAL APPEASEMENTS'
+---
 
-from return_header rh
+# 4. Returns and Appeasements
 
-join return_item ri
-on rh.RETURN_ID = ri.RETURN_ID
+## Business Problem
+Find total returned amount and appeasement amount.
 
-join return_adjustment ra
-on rh.RETURN_ID = ra.RETURN_ID
+### SQL Query
 
-where RETURN_ADJUSTMENT_TYPE_ID = 'APPEASEMENTS'
+```sql
+SELECT
 
-5 Detailed Return Information
-Business Problem:
-Certain teams need granular return data (reason, date, refund amount) for analyzing return rates, identifying recurring issues, or updating policies.
-Fields to Retrieve:
-RETURN_ID
-ENTRY_DATE
-RETURN_ADJUSTMENT_TYPE_ID (refund type, store credit, etc.)
-AMOUNT
-COMMENTS
-ORDER_ID
-ORDER_DATE
-RETURN_DATE
-PRODUCT_STORE_ID
-select
+SUM(ri.RETURN_QUANTITY * ri.RETURN_PRICE) AS TOTAL_RETURN_AMOUNT,
+
+COUNT(DISTINCT ri.RETURN_ID) AS TOTAL_RETURNS,
+
+SUM(ra.AMOUNT) AS TOTAL_APPEASEMENTS_AMOUNT,
+
+COUNT(DISTINCT ra.RETURN_ADJUSTMENT_ID) AS TOTAL_APPEASEMENTS
+
+FROM return_header rh
+
+JOIN return_item ri
+ON rh.RETURN_ID = ri.RETURN_ID
+
+JOIN return_adjustment ra
+ON rh.RETURN_ID = ra.RETURN_ID
+
+WHERE RETURN_ADJUSTMENT_TYPE_ID='APPEASEMENTS';
+```
+
+---
+
+# 5. Detailed Return Information
+
+### Fields
+- RETURN_ID
+- ENTRY_DATE
+- RETURN_ADJUSTMENT_TYPE_ID
+- AMOUNT
+- COMMENTS
+- ORDER_ID
+- ORDER_DATE
+- RETURN_DATE
+- PRODUCT_STORE_ID
+
+### SQL Query
+
+```sql
+SELECT
+
 rh.RETURN_ID,
 rh.ENTRY_DATE,
 ra.RETURN_ADJUSTMENT_TYPE_ID,
@@ -149,134 +191,151 @@ oh.ORDER_DATE,
 rh.RETURN_DATE,
 oh.PRODUCT_STORE_ID
 
-from return_header rh
+FROM return_header rh
 
-join return_item ri
-on rh.RETURN_ID = ri.return_id
+JOIN return_item ri
+ON rh.RETURN_ID = ri.RETURN_ID
 
-join return_adjustment ra
-on ri.RETURN_ITEM_SEQ_ID = ra.RETURN_ITEM_SEQ_ID
-and ri.return_id = ra.return_id
+JOIN return_adjustment ra
+ON ri.RETURN_ITEM_SEQ_ID = ra.RETURN_ITEM_SEQ_ID
+AND ri.RETURN_ID = ra.RETURN_ID
 
 JOIN order_header oh
-on ri.order_id = oh.ORDER_ID
+ON ri.ORDER_ID = oh.ORDER_ID;
+```
 
-6 Orders with Multiple Returns
-Business Problem:
-Analyzing orders with multiple returns can identify potential fraud, chronic issues with certain items, or inconsistent shipping processes.
-Fields to Retrieve:
-ORDER_ID
-RETURN_ID
-RETURN_DATE
-RETURN_REASON
-RETURN_QUANTITY
-select  
+---
+
+# 6. Orders with Multiple Returns
+
+```sql
+SELECT
+
 ri.ORDER_ID,
 ri.RETURN_ID,
 rh.RETURN_DATE,
-ri.RETURN_REASON_ID as RETURN_REASON,
+ri.RETURN_REASON_ID AS RETURN_REASON,
 ri.RETURN_QUANTITY
 
-from return_header rh
+FROM return_header rh
 
-join return_item ri
-on rh.return_id = ri.return_id
+JOIN return_item ri
+ON rh.RETURN_ID = ri.RETURN_ID
 
-where ri.ORDER_ID in (SELECT ORDER_ID from return_item group by ORDER_ID having count(ORDER_ID) > 1 );
+WHERE ri.ORDER_ID IN
+(
+    SELECT ORDER_ID
+    FROM return_item
+    GROUP BY ORDER_ID
+    HAVING COUNT(ORDER_ID)>1
+);
+```
 
-7 Store with Most One-Day Shipped Orders (Last Month)
-Business Problem:
-Identify which facility (store) handled the highest volume of “one-day shipping” orders in the previous month, useful for operational benchmarking.
-Fields to Retrieve:
-FACILITY_ID
-FACILITY_NAME
-TOTAL_ONE_DAY_SHIP_ORDERS
-REPORTING_PERIOD
+---
+
+# 7. Store with Most One-Day Shipped Orders
+
+```sql
 SELECT
-f.facility_id,
-f.facility_name,
-COUNT(DISTINCT oh.order_id) AS total_one_day_ship_orders,
+
+f.FACILITY_ID,
+f.FACILITY_NAME,
+
+COUNT(DISTINCT oh.ORDER_ID) AS TOTAL_ONE_DAY_SHIP_ORDERS,
 
 DATE_FORMAT(
-DATE_SUB(CURDATE(), INTERVAL 1 MONTH),'%Y-%m') AS reporting_period
+DATE_SUB(CURDATE(),INTERVAL 1 MONTH),
+'%Y-%m'
+) AS REPORTING_PERIOD
 
 FROM facility f
 
 JOIN shipment s
-ON f.facility_id = s.origin_facility_id
+ON f.FACILITY_ID=s.ORIGIN_FACILITY_ID
 
 JOIN order_header oh
-ON s.primary_order_id = oh.order_id
+ON s.PRIMARY_ORDER_ID=oh.ORDER_ID
 
 GROUP BY
-f.facility_id,
-f.facility_name
-ORDER BY total_one_day_ship_orders DESC
+f.FACILITY_ID,
+f.FACILITY_NAME
+
+ORDER BY TOTAL_ONE_DAY_SHIP_ORDERS DESC
+
 LIMIT 1;
+```
 
-8 List of Warehouse Pickers
-Business Problem:
-Warehouse managers need a list of employees responsible for picking and packing orders to manage shifts, productivity, and training needs.
-Fields to Retrieve:
-PARTY_ID (or Employee ID)
-NAME (First/Last)
-ROLE_TYPE_ID (e.g., “WAREHOUSE_PICKER”)
-FACILITY_ID (assigned warehouse)
-STATUS (active or inactive employee)
+---
 
-9 Total Facilities That Sell the Product
-Business Problem:
-Retailers want to see how many (and which) facilities (stores, warehouses, virtual sites) currently offer a product for sale.
-Fields to Retrieve:
-PRODUCT_ID
-PRODUCT_NAME (or INTERNAL_NAME)
-FACILITY_COUNT (number of facilities selling the product)
-(Optionally) a list of FACILITY_IDs if more detail is needed
+# 8. List of Warehouse Pickers
 
-10 Total Items in Various Virtual Facilities
-Business Problem:
-Retailers need to study the relation of inventory levels of products to the type of facility it's stored at. Retrieve all inventory levels for products at locations and include the facility type Id. Do not retrieve facilities that are of type Virtual.
-Fields to Retrieve:
-PRODUCT_ID
-FACILITY_ID
-FACILITY_TYPE_ID
-QOH (Quantity on Hand)
-ATP (Available to Promise)
-select
+## Fields
+- PARTY_ID
+- NAME
+- ROLE_TYPE_ID
+- FACILITY_ID
+- STATUS
+
+
+---
+
+# 9. Total Facilities That Sell the Product
+
+## Fields
+- PRODUCT_ID
+- PRODUCT_NAME
+- FACILITY_COUNT
+- FACILITY_ID LIST
+
+
+---
+
+# 10. Inventory in Facilities
+
+```sql
+SELECT
+
 pf.PRODUCT_ID,
 pf.FACILITY_ID,
 f.FACILITY_TYPE_ID,
-ii.QUANTITY_ON_HAND_TOTAL as QOH ,
-ii.AVAILABLE_TO_PROMISE_TOTAL as ATP
 
-from product_facility pf
+ii.QUANTITY_ON_HAND_TOTAL AS QOH,
 
-join FACILITY f
-on pf.FACILITY_ID = f.FACILITY_ID
+ii.AVAILABLE_TO_PROMISE_TOTAL AS ATP
 
-join INVENTORY_item ii
-on pf.PRODUCT_ID = ii.PRODUCT_ID
-AND pf.facility_id = ii.facility_id;
+FROM product_facility pf
 
-11 Transfer Orders Without Inventory Reservation
-Business Problem:
-When transferring stock between facilities, the system should reserve inventory. If it isn’t reserved, the transfer may fail or oversell.
-Fields to Retrieve:
-TRANSFER_ORDER_ID
-FROM_FACILITY_ID
-TO_FACILITY_ID
-PRODUCT_ID
-REQUESTED_QUANTITY
-RESERVED_QUANTITY
-TRANSFER_DATE
-STATUS
+JOIN facility f
+ON pf.FACILITY_ID=f.FACILITY_ID
 
-12 Orders Without Picklist
-Business Problem:
-A picklist is necessary for warehouse staff to gather items. Orders missing a picklist might be delayed and need attention.
-Fields to Retrieve:
-ORDER_ID
-ORDER_DATE
-ORDER_STATUS
-FACILITY_ID
-DURATION (How long has the order been assigned at the facility)
+JOIN inventory_item ii
+
+ON pf.PRODUCT_ID=ii.PRODUCT_ID
+AND pf.FACILITY_ID=ii.FACILITY_ID;
+```
+
+---
+
+# 11. Transfer Orders Without Inventory Reservation
+
+## Fields
+- TRANSFER_ORDER_ID
+- FROM_FACILITY_ID
+- TO_FACILITY_ID
+- PRODUCT_ID
+- REQUESTED_QUANTITY
+- RESERVED_QUANTITY
+- TRANSFER_DATE
+- STATUS
+
+
+---
+
+# 12. Orders Without Picklist
+
+## Fields
+- ORDER_ID
+- ORDER_DATE
+- ORDER_STATUS
+- FACILITY_ID
+- DURATION
