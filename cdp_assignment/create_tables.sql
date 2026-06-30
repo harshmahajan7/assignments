@@ -1,13 +1,4 @@
--- ==============================================================================
--- Customer Data Platform (CDP) for NotNaked
--- Universal Data Model (UDM) Compliant MySQL Database Schema
--- ==============================================================================
 
--- ------------------------------------------------------------------------------
--- 1. Party
--- Represents any individual or organization. For our CDP, it primarily represents 
--- customers (Persons) but is abstracted to support B2B (Organizations) if needed.
--- ------------------------------------------------------------------------------
 CREATE TABLE Party (
     party_id VARCHAR(40) NOT NULL,
     party_type_enum_id VARCHAR(40) NOT NULL COMMENT 'e.g., PERSON or ORGANIZATION',
@@ -16,11 +7,6 @@ CREATE TABLE Party (
     PRIMARY KEY (party_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 2. Person
--- Stores specific basic information for individual customers. 
--- Subtype of Party.
--- ------------------------------------------------------------------------------
 CREATE TABLE Person (
     party_id VARCHAR(40) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
@@ -31,10 +17,6 @@ CREATE TABLE Person (
     CONSTRAINT fk_person_party FOREIGN KEY (party_id) REFERENCES Party(party_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 3. ContactMech (Contact Mechanism)
--- Base table for any contact method (Email, Phone, Web URL/Social Handle, Postal).
--- ------------------------------------------------------------------------------
 CREATE TABLE ContactMech (
     contact_mech_id VARCHAR(40) NOT NULL,
     contact_mech_type_enum_id VARCHAR(40) NOT NULL COMMENT 'e.g., EMAIL_ADDRESS, TELECOM_NUMBER, POSTAL_ADDRESS, SOCIAL_MEDIA',
@@ -44,10 +26,6 @@ CREATE TABLE ContactMech (
     PRIMARY KEY (contact_mech_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 4. PostalAddress
--- Stores detailed address information. Subtype of ContactMech.
--- ------------------------------------------------------------------------------
 CREATE TABLE PostalAddress (
     contact_mech_id VARCHAR(40) NOT NULL,
     address1 VARCHAR(255) NOT NULL,
@@ -60,10 +38,6 @@ CREATE TABLE PostalAddress (
     CONSTRAINT fk_postal_contactmech FOREIGN KEY (contact_mech_id) REFERENCES ContactMech(contact_mech_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 5. TelecomNumber
--- Stores telephone number details. Subtype of ContactMech.
--- ------------------------------------------------------------------------------
 CREATE TABLE TelecomNumber (
     contact_mech_id VARCHAR(40) NOT NULL,
     country_code VARCHAR(10),
@@ -73,12 +47,6 @@ CREATE TABLE TelecomNumber (
     CONSTRAINT fk_telecom_contactmech FOREIGN KEY (contact_mech_id) REFERENCES ContactMech(contact_mech_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 6. PartyContactMech
--- Associates a Party with a Contact Mechanism. This resolves many-to-many 
--- relationships and supports multiple addresses, emails, phones, etc., per customer.
--- Tracks purposes (Shipping, Billing, Primary Phone) and marketing opt-ins.
--- ------------------------------------------------------------------------------
 CREATE TABLE PartyContactMech (
     party_id VARCHAR(40) NOT NULL,
     contact_mech_id VARCHAR(40) NOT NULL,
@@ -92,11 +60,6 @@ CREATE TABLE PartyContactMech (
     CONSTRAINT fk_pcm_contactmech FOREIGN KEY (contact_mech_id) REFERENCES ContactMech(contact_mech_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 7. PartyIdentification
--- Stores alternate IDs (like Shopify Customer ID, Loyalty IDs) for the customer.
--- Ensures seamless integration with external systems.
--- ------------------------------------------------------------------------------
 CREATE TABLE PartyIdentification (
     party_id VARCHAR(40) NOT NULL,
     party_id_type_enum_id VARCHAR(40) NOT NULL COMMENT 'e.g., SHOPIFY_CUST_ID',
@@ -106,11 +69,6 @@ CREATE TABLE PartyIdentification (
     UNIQUE KEY unique_id_value (party_id_type_enum_id, id_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------------------------
--- 8. CustomerPreference
--- Key-Value table for flexible tracking of other marketing or communication 
--- preferences (e.g., Prefers SMS over Email).
--- ------------------------------------------------------------------------------
 CREATE TABLE CustomerPreference (
     party_id VARCHAR(40) NOT NULL,
     preference_key VARCHAR(100) NOT NULL COMMENT 'e.g., PREFERRED_COMM_CHANNEL',
